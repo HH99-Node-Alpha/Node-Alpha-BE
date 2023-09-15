@@ -3,9 +3,9 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ubuntu/jonghun
+    destination: /home/ubuntu/alpha
 permissions:
-  - object: /home/ubuntu/jonghun/
+  - object: /home/ubuntu/alpha/
     owner: ubuntu
     group: ubuntu
 hooks:

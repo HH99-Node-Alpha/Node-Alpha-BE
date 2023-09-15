@@ -1,4 +1,4 @@
-REPOSITORY=/home/ubuntu/jonghun
+REPOSITORY=/home/ubuntu/alpha
 NODE_APP_DIR=$REPOSITORY/Node-Alpha-BE
 BACKEND_ENV_PATH=$NODE_APP_DIR/.env.production
 
