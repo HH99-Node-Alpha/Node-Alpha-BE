@@ -3,8 +3,7 @@ name: Build and Deploy Node Express to AWS EC2
 on:
   push:
     branches: [ "dev" ]
-  pull_request:
-    branches: [ "dev" ]
+
 
 env:
   PROJECT_NAME: jonghun_project
