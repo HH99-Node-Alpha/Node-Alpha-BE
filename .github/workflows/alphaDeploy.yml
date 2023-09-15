@@ -9,8 +9,8 @@ on:
 env:
   PROJECT_NAME: jonghun_project
   BUCKET_NAME: jonghun-cicd-bucket
-  CODE_DEPLOY_APP_NAME: nodeZzang_cicd
-  DEPLOYMENT_GROUP_NAME: nodeZzang_instance
+  CODE_DEPLOY_APP_NAME: alpha_cicd
+  DEPLOYMENT_GROUP_NAME: alpha_instance
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
   PORT: ${{ secrets.PORT }}
   COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
