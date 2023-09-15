@@ -51,10 +51,6 @@ app.use(passport.session());
 // router
 app.use('/api', mainRouter);
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/build/index.html'));
-});
-
 // 404 미들웨어
 app.use(notFound);
 
