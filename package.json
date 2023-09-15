@@ -1,0 +1,42 @@
+{
+  "name": "Team10_BE",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/HH99-Node-Team10/Team10_BE.git",
+  "author": "team10",
+  "license": "MIT",
+  "scripts": {
+    "start:dev": "NODE_ENV=development nodemon app",
+    "start:prod": "NODE_ENV=production pm2 start ts-node -- -P tsconfig.json src/app.ts",
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@prisma/client": "5.3.0",
+    "@types/cookie-parser": "^1.4.4",
+    "@types/cors": "^2.8.14",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.17",
+    "@types/express-session": "^1.17.7",
+    "@types/morgan": "^1.9.5",
+    "@types/passport": "^1.0.12",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.1",
+    "passport": "^0.6.0",
+    "ts-node": "^10.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.6.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "prettier": "^3.0.3",
+    "prisma": "5.3.0",
+    "typescript": "^5.2.2"
+  }
+}
