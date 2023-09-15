@@ -8,8 +8,11 @@ datasource db {
 }
 
 model Users {
-  userId     Int      @id @default(autoincrement()) @map("userId")
-  email      String   @unique @map("email")
-  nickname   String   @unique @map("nickname")
-  password   String   @map("password")
+  userId   Int    @id @default(autoincrement()) @map("userId")
+  email    String @unique @map("email")
+  name     String @map("name")
+  password String @map("password")
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+  deletedAt DateTime? @map("deletedAt")
 }
