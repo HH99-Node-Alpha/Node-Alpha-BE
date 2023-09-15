@@ -1,1 +1,2 @@
-# Team10_BE
+# Alpha
+홍종훈
