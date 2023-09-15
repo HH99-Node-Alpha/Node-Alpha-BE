@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start:dev": "NODE_ENV=development nodemon app",
-    "start:prod": "NODE_ENV=production pm2 start --name app-name --interpreter ./node_modules/.bin/ts-node -- src/app.ts",
+    "start:prod": "NODE_ENV=production pm2 start --name app-name --interpreter /home/ubuntu/alpha/node_modules/.bin/ts-node -- src/app.ts",
     "test": "jest",
     "coverage": "jest --coverage"
   },
