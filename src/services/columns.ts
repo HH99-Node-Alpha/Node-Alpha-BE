@@ -4,9 +4,9 @@ import { ColumnsResponse } from '../types/columns';
 class ColumnsService {
   constructor(private readonly columnsRepository: ColumnsRepository) {}
 
-  getAllColumns = async () => {
+  getAllColumns = async (boardId: number) => {
     const result: ColumnsResponse[] =
-      await this.columnsRepository.getAllColumns();
+      await this.columnsRepository.getAllColumns(boardId);
     return result;
   };
 
@@ -20,8 +20,8 @@ class ColumnsService {
 
   updateColumn = async (
     columnId: number,
-    columnName: string,
-    columnOrder: number,
+    columnName?: string,
+    columnOrder?: number,
   ) => {
     const result = await this.columnsRepository.updateColumn(
       columnId,
