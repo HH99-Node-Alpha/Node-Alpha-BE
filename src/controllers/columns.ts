@@ -7,7 +7,9 @@ class ColumnsController {
   constructor(private readonly columnsService: ColumnsService) {}
 
   getAllColumns = asyncHandler(async (req: Request, res: Response) => {
-    const result: ColumnsResponse[] = await this.columnsService.getAllColumns();
+    const boardId = +req.params.boardId;
+    const result: ColumnsResponse[] =
+      await this.columnsService.getAllColumns(boardId);
     res.status(200).json({ data: result });
   });
 

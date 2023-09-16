@@ -2,8 +2,9 @@ import { ColumnsResponse } from '../types/columns';
 import prisma from '../utils/prisma/index';
 
 class ColumnsRepository {
-  getAllColumns = async () => {
+  getAllColumns = async (boardId: number) => {
     const columns: ColumnsResponse[] = await prisma.columns.findMany({
+      where: { BoardId: boardId },
       select: {
         columnId: true,
         columnName: true,
@@ -32,15 +33,25 @@ class ColumnsRepository {
 
   updateColumn = async (
     columnId: number,
-    columnName: string,
-    columnOrder: number,
+    columnName?: string,
+    columnOrder?: number,
   ) => {
-    await prisma.columns.update({
-      where: { columnId },
-      data: { columnName, columnOrder },
+    const dataToUpdate: any = {};
+
+    if (columnName) {
+      dataToUpdate.columnName = columnName;
+    }
+
+    if (columnOrder !== undefined) {
+      dataToUpdate.columnOrder = columnOrder;
+    }
+
+    const updatedColumn = await prisma.columns.update({
+      where: { columnId: columnId },
+      data: dataToUpdate,
     });
 
-    return { message: 'success' };
+    return updatedColumn;
   };
 
   deleteColumn = async (columnId: number) => {
