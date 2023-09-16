@@ -8,8 +8,94 @@ datasource db {
 }
 
 model Users {
-  userId     Int      @id @default(autoincrement()) @map("userId")
-  email      String   @unique @map("email")
-  nickname   String   @unique @map("nickname")
-  password   String   @map("password")
+  userId    Int       @id @default(autoincrement()) @map("id")
+  email     String    @unique
+  name      String
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  WorkspacesMembers WorkspacesMembers[]
+
+  @@map("Users")
+}
+
+model Workspaces {
+  workspaceId   Int       @id @default(autoincrement()) @map("id")
+  workspaceName String    @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+  ownerId       Int
+
+  WorkspacesMembers WorkspacesMembers[]
+  Boards            Boards[]
+
+  @@map("Workspaces")
+}
+
+model WorkspacesMembers {
+  memberId    Int       @id @default(autoincrement()) @map("id")
+  WorkspaceId Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  UserId      Int
+
+  // Users 테이블과 관계를 설정 
+
+  User       Users      @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+  Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
+
+  @@map("WorkspacesMembers")
+}
+
+model Boards {
+  boardId     Int       @id @default(autoincrement()) @map("id")
+  WorkspaceId Int
+  boardName   String
+  boardColor  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
+  Columns    Columns[]
+
+  @@map("Boards")
+}
+
+model Columns {
+  columnId    Int       @id @default(autoincrement()) @map("id")
+  BoardId     Int
+  columnName  String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  columnOrder Float
+  Boards      Boards    @relation(fields: [BoardId], references: [boardId], onDelete: Cascade)
+  Cards       Cards[]
+
+  @@map("Columns")
+}
+
+model Cards {
+  cardId          Int       @id @default(autoincrement()) @map("id")
+  cardName        String
+  cardDescription String
+  imageUrl        String?
+  cardColor       String?
+  worker          String? // 배열로할지 고민*
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+  cardOrder       Float
+  dueDate         DateTime
+  MemberId        Int
+  ColumnId        Int
+
+  Columns Columns @relation(fields: [ColumnId], references: [columnId], onDelete: Cascade)
+
+  @@map("Cards")
 }
