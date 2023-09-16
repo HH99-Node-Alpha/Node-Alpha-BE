@@ -1,9 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import prisma from '../utils/prisma/index';
+import bcrypt from 'bcrypt'; // 비밀번호 암호화
 
-
-const prisma = new PrismaClient();
 const router = express.Router();
 
 interface SignupRequest {
