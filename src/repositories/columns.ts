@@ -1,9 +1,8 @@
-import { ColumnsResponse } from '../types/columns';
 import prisma from '../utils/prisma/index';
 
 class ColumnsRepository {
   getAllColumns = async (boardId: number) => {
-    const columns: ColumnsResponse[] = await prisma.columns.findMany({
+    const columns = await prisma.columns.findMany({
       where: { BoardId: boardId },
       select: {
         columnId: true,
@@ -11,7 +10,14 @@ class ColumnsRepository {
         columnOrder: true,
       },
     });
-    return columns;
+
+    const modifiedColumns = columns.map((column) => ({
+      columnId: String(column.columnId),
+      columnName: column.columnName,
+      columnOrder: column.columnOrder,
+    }));
+
+    return { columns: modifiedColumns };
   };
 
   createColumn = async (boardId: number, columnName: string) => {
@@ -24,11 +30,18 @@ class ColumnsRepository {
     const lastOrder = lastColumn?.columnOrder || 0;
     const newOrder = lastOrder + 1;
 
-    await prisma.columns.create({
+    const newColumn = await prisma.columns.create({
       data: { columnName, BoardId: boardId, columnOrder: newOrder },
     });
 
-    return { message: 'success' };
+    return {
+      message: 'success',
+      column: {
+        columnId: String(newColumn.columnId),
+        columnName: newColumn.columnName,
+        columnOrder: newColumn.columnOrder,
+      },
+    };
   };
 
   updateColumn = async (
@@ -51,7 +64,11 @@ class ColumnsRepository {
       data: dataToUpdate,
     });
 
-    return updatedColumn;
+    return {
+      columnId: String(updatedColumn.columnId),
+      columnName: updatedColumn.columnName,
+      columnOrder: updatedColumn.columnOrder,
+    };
   };
 
   deleteColumn = async (columnId: number) => {

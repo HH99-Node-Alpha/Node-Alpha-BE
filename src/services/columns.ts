@@ -1,12 +1,10 @@
 import ColumnsRepository from '../repositories/columns';
-import { ColumnsResponse } from '../types/columns';
 
 class ColumnsService {
   constructor(private readonly columnsRepository: ColumnsRepository) {}
 
   getAllColumns = async (boardId: number) => {
-    const result: ColumnsResponse[] =
-      await this.columnsRepository.getAllColumns(boardId);
+    const result = await this.columnsRepository.getAllColumns(boardId);
     return result;
   };
 
