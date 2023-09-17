@@ -8,6 +8,11 @@ class BoardsService {
     return result;
   };
 
+  getOneBoard = async (boardId: number) => {
+    const result = await this.boardsRepository.getOneBoard(boardId);
+    return result;
+  };
+
   createBoard = async (boardId: number, boardName: string) => {
     const result = await this.boardsRepository.createBoard(boardId, boardName);
     return result;
