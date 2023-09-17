@@ -9,6 +9,7 @@ class ColumnsRepository {
         columnName: true,
         columnOrder: true,
       },
+      orderBy: { columnOrder: 'asc' },
     });
 
     const modifiedColumns = columns.map((column) => ({
