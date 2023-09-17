@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import http from 'http';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import path from 'path';
@@ -6,6 +7,7 @@ import session from 'express-session';
 import { config } from 'dotenv';
 import cors from 'cors';
 import passport from 'passport';
+import WebSocket from './socket';
 
 import mainRouter from './routes/index';
 
@@ -15,6 +17,7 @@ import errorHandler from './middlewares/errorHandler';
 config({ path: `.env.${process.env.NODE_ENV}` });
 
 const app = express();
+const server = http.createServer(app);
 
 app.set('port', process.env.PORT || 8000);
 app.use(
@@ -51,10 +54,6 @@ app.use(passport.session());
 // router
 app.use('/api', mainRouter);
 
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../frontend/build/index.html'));
-});
-
 // 404 미들웨어
 app.use(notFound);
 
@@ -67,6 +66,8 @@ if (process.env.NODE_ENV === 'production') {
   app.use(errorHandler);
 }
 
-app.listen(app.get('port'), () => {
+server.listen(app.get('port'), () => {
   console.log(app.get('port'), '번 포트에서 실행');
 });
+
+WebSocket(server, app);
