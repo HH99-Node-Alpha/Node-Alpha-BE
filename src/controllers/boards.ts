@@ -8,7 +8,13 @@ class BoardsController {
   getAllBoards = asyncHandler(async (req: Request, res: Response) => {
     const workspaceId = +req.params.workspaceId;
     const result = await this.boardsService.getAllBoards(workspaceId);
-    res.status(200).json({ data: result });
+    res.status(200).json(result);
+  });
+
+  getOneBoard = asyncHandler(async (req: Request, res: Response) => {
+    const boardId = +req.params.boardId;
+    const result = await this.boardsService.getOneBoard(boardId);
+    res.status(200).json(result);
   });
 
   createBoard = asyncHandler(async (req: Request, res: Response) => {

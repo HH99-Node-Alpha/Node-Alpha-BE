@@ -4,12 +4,15 @@ class BoardsRepository {
   getAllBoards = async (workspaceId: number) => {
     const boards = await prisma.boards.findMany({
       where: { WorkspaceId: workspaceId },
-      select: {
-        boardId: true,
-        boardName: true,
-      },
     });
     return boards;
+  };
+
+  getOneBoard = async (boardId: number) => {
+    const board = await prisma.boards.findFirst({
+      where: { boardId },
+    });
+    return board;
   };
 
   createBoard = async (workspaceId: number, boardName: string) => {
