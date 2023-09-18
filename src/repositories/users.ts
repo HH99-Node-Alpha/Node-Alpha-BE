@@ -23,7 +23,6 @@ class UsersRepository {
         },
       },
     });
-    console.log(workspaces);
     return workspaces!.WorkspacesMembers.map((member) => member.Workspaces);
   };
 }
