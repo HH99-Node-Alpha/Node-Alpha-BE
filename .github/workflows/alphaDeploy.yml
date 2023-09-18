@@ -2,8 +2,7 @@ name: Build and Deploy Node Express to AWS EC2
 
 on:
   push:
-    branches: [ "dev" ]
-
+    branches: ['dev']
 
 env:
   PROJECT_NAME: jonghun_project
@@ -25,7 +24,8 @@ jobs:
           echo 'PORT=${{ secrets.PORT }}' > .env.production
           echo 'COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}' >> .env.production    
           echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> .env.production
-      
+          echo 'CLIENT_PROD_URL=${{ secrets.CLIENT_PROD_URL }}' >> .env.production
+
       - name: Make Zip File
         run: |
           zip -qq -r ./$GITHUB_SHA.zip .
@@ -42,8 +42,8 @@ jobs:
           aws s3 cp ./$GITHUB_SHA.zip s3://$BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip
 
       - name: Code Deploy To EC2 instance
-        run: aws deploy create-deployment 
-                --application-name $CODE_DEPLOY_APP_NAME 
-                --deployment-config-name CodeDeployDefault.AllAtOnce
-                --deployment-group-name $DEPLOYMENT_GROUP_NAME 
-                --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
+        run: aws deploy create-deployment
+          --application-name $CODE_DEPLOY_APP_NAME
+          --deployment-config-name CodeDeployDefault.AllAtOnce
+          --deployment-group-name $DEPLOYMENT_GROUP_NAME
+          --s3-location bucket=$BUCKET_NAME,bundleType=zip,key=$PROJECT_NAME/$GITHUB_SHA.zip
