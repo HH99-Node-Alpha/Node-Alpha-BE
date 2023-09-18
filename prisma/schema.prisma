@@ -8,14 +8,14 @@ datasource db {
 }
 
 model Users {
-
-  userId    Int       @id @default(autoincrement()) @map("id")
-  email     String    @unique
-  name      String
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  userId       Int       @id @default(autoincrement()) @map("id")
+  email        String    @unique
+  name         String
+  password     String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  refreshToken String?   @db.Text
 
   WorkspacesMembers WorkspacesMembers[]
 
@@ -99,5 +99,4 @@ model Cards {
   Columns Columns @relation(fields: [ColumnId], references: [columnId], onDelete: Cascade)
 
   @@map("Cards")
-
 }
