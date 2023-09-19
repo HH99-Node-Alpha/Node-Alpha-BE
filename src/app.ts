@@ -86,4 +86,3 @@ server.listen(app.get('port'), () => {
 });
 
 WebSocket(server, app);
-// SseServer(server);

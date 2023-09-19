@@ -26,6 +26,13 @@ class ColumnsController {
       columnName,
       columnOrder,
     );
+    // result가 없는 경우는 보내면 안되므로 if문
+    // update될 때마다, 해당 방의 모든 사용자에게 정보 전송해서 업데이트(실시간으로)
+    if (result) {
+      const io = req.app.get('io');
+      io.of('/board').emit('updateColumnOrder', result);
+    }
+
     res.status(200).send(result);
   });
 
