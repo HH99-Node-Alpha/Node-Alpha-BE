@@ -16,8 +16,12 @@ class BoardsRepository {
   };
 
   createBoard = async (workspaceId: number, boardName: string) => {
+    const allColors = await prisma.colors.findMany();
+    const randomColor = allColors[Math.floor(Math.random() * allColors.length)];
+    const randomColorId = randomColor.colorId;
+
     await prisma.boards.create({
-      data: { WorkspaceId: workspaceId, boardName },
+      data: { WorkspaceId: workspaceId, boardName, colorId: randomColorId },
     });
 
     return { message: 'success' };
