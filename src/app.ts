@@ -7,6 +7,7 @@ import session from 'express-session';
 import { config } from 'dotenv';
 import cors from 'cors';
 import passport from 'passport';
+
 import WebSocket from './socket';
 
 import mainRouter from './routes/index';
@@ -85,3 +86,4 @@ server.listen(app.get('port'), () => {
 });
 
 WebSocket(server, app);
+// SseServer(server);
