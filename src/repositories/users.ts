@@ -15,6 +15,7 @@ class UsersRepository {
                   select: {
                     boardId: true,
                     boardName: true,
+                    Color: true,
                   },
                 },
               },
