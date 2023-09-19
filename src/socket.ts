@@ -42,6 +42,11 @@ const WebSocket = (server: HttpServer, app: Application) => {
       });
 
       // (2)칼럼 순서 변경 - 실시간 통신 -> /controllers/columns.ts의 updated쪽에서 처리
+      socket.on('columnToServer', async (data: any) => {
+        console.log(data);
+        socket.emit('columnToClient', '본인이 순서 변경');
+        socket.to(boardId).emit('columnToClient', '타인이 순서 변경');
+      });
 
       // Todo
       // (2-2)카드 순서 변경
@@ -53,14 +58,3 @@ const WebSocket = (server: HttpServer, app: Application) => {
 };
 
 export default WebSocket;
-
-// 백업용 - 메세지 확인용
-// socket.on('columnToServer', async (data: any) => {
-//   socket.emit('columnToClient', '본인이 순서 변경');
-//   socket.to(boardId).emit('columnToClient', '타인이 순서 변경');
-// socket.to(boardId).emit('updateColumnOrder', data);
-// or
-// setInterval(() => {
-//   socket.emit('columnToClient', '순서 변경 성공');
-// }, interval);
-// });
