@@ -4,6 +4,9 @@ class BoardsRepository {
   getAllBoards = async (workspaceId: number) => {
     const boards = await prisma.boards.findMany({
       where: { WorkspaceId: workspaceId },
+      include: {
+        Color: true,
+      },
     });
     return boards;
   };
@@ -11,6 +14,9 @@ class BoardsRepository {
   getOneBoard = async (boardId: number) => {
     const board = await prisma.boards.findFirst({
       where: { boardId },
+      include: {
+        Color: true,
+      },
     });
     return board;
   };
