@@ -1,7 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { Application } from 'express';
-import prisma from './utils/prisma/index';
 
 const interval: number = 3000;
 
@@ -12,26 +11,13 @@ const WebSocket = (server: HttpServer, app: Application) => {
       origin: '*',
     },
   });
-
   app.set('io', io);
-  const board = io.of('/');
+  const board = io.of('/board');
 
-  // const boardRoom = io.of(`/${boardId}`);
-
+  // step0: socket 기본 연결
   board.on('connection', (socket) => {
-    // const req = socket.request;
-    const { referer } = socket.request.headers; // 브라우저 주소가 들어있음
-    console.log(referer); // 체크용
-    console.log('board 접속: ', socket.id);
-
-    // const boardId = 0;
-    // socket.on('join', (data) => {
-    //   socket.join(data);
-    //   console.log(data);
-    // });
-
-    // console.log(boardId);
-
+    console.log('board에 접속한 socket.id:', socket.id);
+    // console.log(socket.request.headers);
     socket.on('disconnect', () => {
       console.log('board 접속해제', socket.id);
       clearInterval(interval);
@@ -41,54 +27,40 @@ const WebSocket = (server: HttpServer, app: Application) => {
       console.error(error);
     });
 
-    let flag: number = 0;
-    let result: any = '';
-    /** 1. columnOrder */
-    // 클라이언트 -> 서버
-    socket.on('ColumnToServer', async (data: any) => {
-      console.log(data);
-
-      const { columnId, columnOrder } = data;
-      const changeColumnOrder = await prisma.columns.update({
-        where: { columnId },
-        data: { columnOrder },
+    // step1: 'join'을 통해서, 'boardId'에 입장 (by boardId)
+    socket.on('join', (boardId) => {
+      // (1)방에 참가(join)
+      socket.join(boardId); // 전달받은 boardRoomId에 접속
+      console.log('현재 접속중인 socket.id와 boardRoom번호:', socket.rooms);
+      // (1-2)본인 접속 메세지
+      socket.emit('join', {
+        message: `(본인)${socket.id}님은 ${boardId}번 board에 입장했습니다`,
+      });
+      // (1-3)다른 사람 들어온 걸 알게 해줌 -> to(boardId): 입장한 본인 제외 모든 boardId에 있는 사람들에게
+      socket.to(boardId).emit('join', {
+        message: `(타인)${socket.id}님이 ${boardId}번 board에 입장했습니다`,
       });
 
-      console.log(changeColumnOrder);
-      flag = 1;
-      result = changeColumnOrder;
+      // (2)칼럼 순서 변경 - 실시간 통신 -> /controllers/columns.ts의 updated쪽에서 처리
+
+      // Todo
+      // (2-2)카드 순서 변경
+      // (3)그냥 떠나는게 아니라, 다른 방 이동이면 leave -> if문으로 join or disconnect
+      // (x)방 나가기
+      // socket.leave(boardId);
     });
-
-    // result가 바뀌면: 서버 -> 클라이언트 ( db에 저장된 변경값을 다시 보내주기 )
-    if (flag === 1) {
-      setInterval(() => {
-        socket.emit('ColumnToClient', result);
-      }, interval);
-      flag = 0;
-    }
-
-    /** 2. cardOrder */
-    // 클라이언트 -> 서버
-    socket.on('CardToServer', async (data: any) => {
-      const { cardId, cardOrder } = data;
-      const changecardOrder = await prisma.cards.update({
-        where: { cardId },
-        data: { cardOrder },
-      });
-
-      console.log(changecardOrder);
-      result = changecardOrder;
-      flag = 2;
-    });
-
-    // 서버 -> 클라이언트 ( db에 저장된 변경값을 다시 보내주기 )
-    if (flag === 2) {
-      setInterval(() => {
-        socket.emit('CardToClient', result);
-      }, interval);
-      flag = 0;
-    }
   });
 };
 
 export default WebSocket;
+
+// 백업용 - 메세지 확인용
+// socket.on('columnToServer', async (data: any) => {
+//   socket.emit('columnToClient', '본인이 순서 변경');
+//   socket.to(boardId).emit('columnToClient', '타인이 순서 변경');
+// socket.to(boardId).emit('updateColumnOrder', data);
+// or
+// setInterval(() => {
+//   socket.emit('columnToClient', '순서 변경 성공');
+// }, interval);
+// });
