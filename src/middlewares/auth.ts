@@ -10,7 +10,7 @@ interface DecodedToken {
 export default async function authMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const { Authorization } = req.cookies;
@@ -23,7 +23,7 @@ export default async function authMiddleware(
     // const decodedToken = jwt.verify(token, process.env.SECRET_KEY) as DecodedToken;
     // const userId = decodedToken.userId;
     // if (!process.env.SECRET_KEY) throw new Error('SECRET_KEY가 존재하지 않습니다.'); // 이 부분을 해주면 환경변수설정해준 거라 SECRET_KEY가 없다고 뜨지 않음
-    const decodedToken: unknown = jwt.verify(token, process.env.SECRET_KEY!); // 이거는 무조건 있다고 명시하는게 ! 이거임 효율적이라 더 많이 씀 
+    const decodedToken: unknown = jwt.verify(token, process.env.SECRET_KEY!); // 이거는 무조건 있다고 명시하는게 ! 이거임 효율적이라 더 많이 씀
     if (typeof decodedToken !== 'object' || decodedToken === null) {
       throw new Error('토큰 형식이 올바르지 않습니다.');
     }
@@ -41,7 +41,6 @@ export default async function authMiddleware(
     req.user = user;
     next();
   } catch (error: any) {
-    
     res.clearCookie('Authorization');
 
     switch (error.message) {
