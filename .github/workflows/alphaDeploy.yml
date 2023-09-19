@@ -25,6 +25,8 @@ jobs:
           echo 'COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}' >> .env.production    
           echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> .env.production
           echo 'CLIENT_PROD_URL=${{ secrets.CLIENT_PROD_URL }}' >> .env.production
+          echo 'ACCESS_SECRET_KEY=${{ secrets.ACCESS_SECRET_KEY }}' >> .env.production
+          echo 'REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}' >> .env.production
 
       - name: Make Zip File
         run: |
