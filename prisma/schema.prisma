@@ -60,9 +60,9 @@ model Boards {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
-  colorId  Int      @unique
+  // colorId  Int      @unique
   
-  Color    Colors   @relation("BoardToColor", fields: [colorId], references: [colorId])
+  // Color    Colors   @relation("BoardToColor", fields: [colorId], references: [colorId])
   Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
 
   Columns    Columns[]
@@ -98,17 +98,17 @@ model Cards {
   dueDate         DateTime
   MemberId        Int
   ColumnId        Int
-  colorId         Int      @unique
-  Color           Colors   @relation("CardToColor", fields: [colorId], references: [colorId])
+  // colorId         Int      @unique
+  // Color           Colors   @relation("CardToColor", fields: [colorId], references: [colorId])
 
   Columns         Columns  @relation(fields: [ColumnId], references: [columnId], onDelete: Cascade)
 
   @@map("Cards")
 }
 
-model Colors {
-  colorId          Int     @id @default(autoincrement()) @map("id")
-  color            String  @unique 
-  Board            Boards? @relation("BoardToColor")
-  Card             Cards?  @relation("CardToColor")
- }
+// model Colors {
+//   colorId          Int     @id @default(autoincrement()) @map("id")
+//   color            String  @unique 
+//   Board            Boards? @relation("BoardToColor")
+//   Card             Cards?  @relation("CardToColor")
+//  }
