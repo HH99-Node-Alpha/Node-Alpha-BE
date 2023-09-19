@@ -17,7 +17,7 @@ class BoardsRepository {
 
   createBoard = async (workspaceId: number, boardName: string) => {
     await prisma.boards.create({
-      data: { WorkspaceId: workspaceId, boardName, colorId: 1 },
+      data: { WorkspaceId: workspaceId, boardName },
     });
 
     return { message: 'success' };
