@@ -1,6 +1,8 @@
 import prisma from '../utils/prisma/index';
+import UsersRepository from './users';
 
 class BoardsRepository {
+  constructor(private readonly usersRepository: UsersRepository) {}
   getAllBoards = async (workspaceId: number) => {
     const boards = await prisma.boards.findMany({
       where: { WorkspaceId: workspaceId },
@@ -34,26 +36,34 @@ class BoardsRepository {
   };
 
   updateBoard = async (
+    userId: number,
+    workspaceId: number,
     boardId: number,
     boardName?: string,
     colorId?: number,
   ) => {
     const dataToUpdate: any = {};
 
-    if (boardName) {
-      dataToUpdate.boardName = boardName;
+    const isMember = await this.usersRepository.isMemberOfWorkspace(
+      userId,
+      workspaceId,
+    );
+    if (isMember) {
+      if (boardName) {
+        dataToUpdate.boardName = boardName;
+      }
+
+      if (colorId) {
+        dataToUpdate.colorId = colorId;
+      }
+
+      await prisma.boards.update({
+        where: { boardId: boardId },
+        data: dataToUpdate,
+      });
+
+      return { message: 'success' };
     }
-
-    if (colorId) {
-      dataToUpdate.colorId = colorId;
-    }
-
-    await prisma.boards.update({
-      where: { boardId: boardId },
-      data: dataToUpdate,
-    });
-
-    return { message: 'success' };
   };
 
   deleteBoard = async (columnId: number) => {
