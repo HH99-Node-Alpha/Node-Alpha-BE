@@ -35,7 +35,8 @@
     "socket.io": "^4.7.2",
     "sse": "^0.0.8",
     "sse-ts": "^1.0.2",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

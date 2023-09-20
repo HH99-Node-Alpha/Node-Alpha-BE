@@ -21,12 +21,12 @@ class BoardsService {
   updateBoard = async (
     boardId: number,
     boardName?: string,
-    boardColor?: string,
+    colorId?: number,
   ) => {
     const result = await this.boardsRepository.updateBoard(
       boardId,
       boardName,
-      boardColor,
+      colorId,
     );
     return result;
   };

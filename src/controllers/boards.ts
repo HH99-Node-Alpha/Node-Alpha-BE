@@ -26,11 +26,11 @@ class BoardsController {
 
   updateBoard = asyncHandler(async (req: Request, res: Response) => {
     const boardId = +req.params.boardId;
-    const { boardName, boardColor } = req.body;
+    const { boardName, colorId } = req.body;
     const result = await this.boardsService.updateBoard(
       boardId,
       boardName,
-      boardColor,
+      colorId,
     );
     res.status(200).send(result);
   });

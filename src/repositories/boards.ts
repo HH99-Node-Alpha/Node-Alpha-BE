@@ -36,7 +36,7 @@ class BoardsRepository {
   updateBoard = async (
     boardId: number,
     boardName?: string,
-    boardColor?: string,
+    colorId?: number,
   ) => {
     const dataToUpdate: any = {};
 
@@ -44,8 +44,8 @@ class BoardsRepository {
       dataToUpdate.boardName = boardName;
     }
 
-    if (boardColor) {
-      dataToUpdate.boardColor = boardColor;
+    if (colorId) {
+      dataToUpdate.colorId = colorId;
     }
 
     await prisma.boards.update({
