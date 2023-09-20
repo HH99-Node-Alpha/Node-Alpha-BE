@@ -40,6 +40,11 @@ class BoardsController {
     const result = await this.boardsService.deleteBoard(boardId);
     res.status(200).send(result);
   });
+
+  getAllColors = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.boardsService.getAllColors();
+    res.status(200).send(result);
+  });
 }
 
 export default BoardsController;

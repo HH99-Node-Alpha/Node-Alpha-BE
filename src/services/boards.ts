@@ -35,6 +35,11 @@ class BoardsService {
     const result = await this.boardsRepository.deleteBoard(boardId);
     return result;
   };
+
+  getAllColors = async () => {
+    const result = await this.boardsRepository.getAllColors();
+    return result;
+  };
 }
 
 export default BoardsService;

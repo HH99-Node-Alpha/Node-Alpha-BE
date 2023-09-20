@@ -9,6 +9,7 @@ const boardsRepository = new BoardsRepository();
 const boardsService = new BoardsService(boardsRepository);
 const boardsController = new BoardsController(boardsService);
 
+router.get('/colors', boardsController.getAllColors);
 router.get('/boards', boardsController.getAllBoards);
 router.get('/boards/:boardId', boardsController.getOneBoard);
 router.post('/boards', boardsController.createBoard);

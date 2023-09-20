@@ -63,6 +63,11 @@ class BoardsRepository {
 
     return { message: 'success' };
   };
+
+  getAllColors = async () => {
+    const colors = await prisma.colors.findMany({});
+    return colors;
+  };
 }
 
 export default BoardsRepository;
