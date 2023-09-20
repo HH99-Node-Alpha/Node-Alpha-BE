@@ -19,9 +19,14 @@ class ColumnsController {
   });
 
   updateColumn = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const columnId = +req.params.columnId;
     const { columnName, columnOrder } = req.body;
     const result = await this.columnsService.updateColumn(
+      userId,
+      workspaceId,
       columnId,
       columnName,
       columnOrder,
@@ -37,8 +42,15 @@ class ColumnsController {
   });
 
   deleteColumn = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const columnId = +req.params.columnId;
-    const result = await this.columnsService.deleteColumn(columnId);
+    const result = await this.columnsService.deleteColumn(
+      userId,
+      workspaceId,
+      columnId,
+    );
     res.status(200).send(result);
   });
 }
