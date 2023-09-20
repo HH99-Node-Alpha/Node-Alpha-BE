@@ -66,12 +66,23 @@ class BoardsRepository {
     }
   };
 
-  deleteBoard = async (columnId: number) => {
-    await prisma.columns.delete({
-      where: { columnId },
-    });
+  deleteBoard = async (
+    userId: number,
+    workspaceId: number,
+    columnId: number,
+  ) => {
+    const isMember = await this.usersRepository.isMemberOfWorkspace(
+      userId,
+      workspaceId,
+    );
 
-    return { message: 'success' };
+    if (isMember) {
+      await prisma.columns.delete({
+        where: { columnId },
+      });
+
+      return { message: 'success' };
+    }
   };
 
   getAllColors = async () => {
