@@ -9,6 +9,7 @@ import cors from 'cors';
 import passport from 'passport';
 
 import WebSocket from './socket';
+import LogMiddleware from './middlewares/log';
 
 import mainRouter from './routes/index';
 
@@ -21,6 +22,7 @@ const app = express();
 const server = http.createServer(app);
 
 app.set('port', process.env.PORT || 8000);
+app.use(LogMiddleware);
 let allowedOrigins = [process.env.CLIENT_URL];
 
 if (process.env.NODE_ENV === 'production') {
