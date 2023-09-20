@@ -19,11 +19,15 @@ class BoardsService {
   };
 
   updateBoard = async (
+    userId: number,
+    workspaceId: number,
     boardId: number,
     boardName?: string,
     colorId?: number,
   ) => {
     const result = await this.boardsRepository.updateBoard(
+      userId,
+      workspaceId,
       boardId,
       boardName,
       colorId,

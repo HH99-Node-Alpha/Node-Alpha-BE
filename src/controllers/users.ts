@@ -7,7 +7,8 @@ class UsersController {
 
   getUserWorkspacesAndBoards = asyncHandler(
     async (req: Request, res: Response) => {
-      const userId = 1;
+      const user: any = req.user!;
+      const userId = user.userId;
       const result = await this.usersService.getUserWorkspacesAndBoards(userId);
       res.status(200).json(result);
     },

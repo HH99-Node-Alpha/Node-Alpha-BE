@@ -25,9 +25,14 @@ class BoardsController {
   });
 
   updateBoard = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const boardId = +req.params.boardId;
     const { boardName, colorId } = req.body;
     const result = await this.boardsService.updateBoard(
+      userId,
+      workspaceId,
       boardId,
       boardName,
       colorId,
