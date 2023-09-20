@@ -41,8 +41,15 @@ class BoardsController {
   });
 
   deleteBoard = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const boardId = +req.params.boardId;
-    const result = await this.boardsService.deleteBoard(boardId);
+    const result = await this.boardsService.deleteBoard(
+      userId,
+      workspaceId,
+      boardId,
+    );
     res.status(200).send(result);
   });
 

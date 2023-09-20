@@ -35,8 +35,16 @@ class BoardsService {
     return result;
   };
 
-  deleteBoard = async (boardId: number) => {
-    const result = await this.boardsRepository.deleteBoard(boardId);
+  deleteBoard = async (
+    userId: number,
+    workspaceId: number,
+    boardId: number,
+  ) => {
+    const result = await this.boardsRepository.deleteBoard(
+      userId,
+      workspaceId,
+      boardId,
+    );
     return result;
   };
 
