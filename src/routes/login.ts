@@ -1,11 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
+import { LoginRequest } from '../types/login';
 import prisma from '../utils/prisma/index';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import authMiddleware from '../middlewares/auth';
 
 const router = express.Router();
-
 
 /** 사용자 로그인 API 
 1. `email`, `password`를 **body**로 전달받습니다.
@@ -14,9 +14,16 @@ const router = express.Router();
 4. 로그인에 성공한다면, 사용자에게 JWT와 name을 발급합니다.
 */
 
-interface LoginRequest {
-  email: string;
-  password: string;
+type CookieOptions = {
+  httpOnly: boolean;
+  sameSite: 'none' | 'lax' | 'strict' | undefined;
+  secure: boolean;
+}
+
+const cookieOptions:CookieOptions = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  secure: process.env.NODE_ENV === 'production',
 }
 
 router.post(
@@ -61,8 +68,9 @@ router.post(
 
       // Access, Refresh Token을 HttpOnly Cookie에 저장합니다.
       // 보안을 강화하기 위한 중요한 옵션, https로 배포시 secure: true로 설정
-      res.cookie('Authorization', `Bearer ${accessToken}`, { httpOnly: true });
-      res.cookie('refreshToken', refreshToken, { httpOnly: true });
+      res.cookie('Authorization', `Bearer ${accessToken}`, cookieOptions)
+
+      res.cookie('refreshToken', refreshToken, cookieOptions);
 
       // Refresh Token을 데이터베이스에 저장합니다.
       await prisma.users.update({
@@ -81,7 +89,8 @@ router.post(
 
 /** Accsess Token 인증 API */
 router.post(
-  '/token', authMiddleware,
+  '/token',
+  authMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     // try {
     //   const { Authorization } = req.cookies;
@@ -112,18 +121,18 @@ router.post(
     //     });
     //   }
 
-      return res
-        .status(200)
-        .json({ message: '엑세스 토큰 인증에 성공하였습니다.' });
-  //   } catch (err) {
-  //     // accessToken 쿠키를 삭제합니다.
-  //     res.clearCookie('Authorization');
+    return res
+      .status(200)
+      .json({ message: '엑세스 토큰 인증에 성공하였습니다.' });
+    //   } catch (err) {
+    //     // accessToken 쿠키를 삭제합니다.
+    //     res.clearCookie('Authorization');
 
-  //     console.error(err);
-  //     return res.status(400).json({
-  //       message: '엑세스 토큰 인증에 실패하였습니다.',
-  //     });
-  //   }
+    //     console.error(err);
+    //     return res.status(400).json({
+    //       message: '엑세스 토큰 인증에 실패하였습니다.',
+    //     });
+    //   }
   },
 );
 
@@ -141,10 +150,20 @@ router.post(
       }
 
       // Refresh Token이 서버가 발급한 것이 맞는지 검증합니다.
-      const { userId } = jwt.verify(
+      // const { userId } = jwt.verify(
+      //   refreshToken,
+      //   process.env.REFRESH_SECRET_KEY!,
+      // )
+
+      const decodedToken = jwt.verify(
         refreshToken,
         process.env.REFRESH_SECRET_KEY!,
-      ) as { userId: number };
+      );
+      if (typeof decodedToken !== 'object' || decodedToken === null) {
+        throw new Error('토큰 형식이 올바르지 않습니다.');
+      }
+
+      const userId = decodedToken.userId;
 
       const user = await prisma.users.findUnique({
         where: { userId: +userId },
@@ -169,7 +188,7 @@ router.post(
           expiresIn: '1h',
         },
       );
-      res.cookie('newAccessToken', newAccessToken, { httpOnly: true });
+      res.cookie('newAccessToken', newAccessToken, cookieOptions);
 
       return res
         .status(200)
@@ -191,8 +210,9 @@ router.post('/logout', authMiddleware, (req: Request, res: Response) => {
   // 쿠키에서 accessToken과 refreshToken을 제거
   res.clearCookie('Authorization');
   res.clearCookie('refreshToken');
-  return res.status(200).json({ message: '현재 로그아웃 상태 또는 세션이 만료되었습니다.' });
+  return res
+    .status(200)
+    .json({ message: '현재 로그아웃 상태 또는 세션이 만료되었습니다.' });
 });
-
 
 export default router;
