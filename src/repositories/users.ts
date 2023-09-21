@@ -75,6 +75,67 @@ class UsersRepository {
     console.log(email, name, result);
     return result;
   };
+
+  // socket1(초대를 받은 경우 -> workspaceMember생성)
+  createWorkspaceMember = async (workspaceId: number, userId: number) => {
+    const createdWorkspaceMember = await prisma.workspacesMembers.create({
+      data: { WorkspaceId: workspaceId, UserId: userId },
+    });
+    return createdWorkspaceMember;
+  };
+
+  // socket2(유저찾기 - userId로만)
+  getUser = async (userId: number) => {
+    const user = await prisma.users.findUnique({
+      where: { userId },
+    });
+    return user;
+  };
+
+  // socket3(invitaions테이블 전체 조회)
+  getInvitations = async (userId: number) => {
+    const invitations = await prisma.invitations.findMany({
+      where: { InvitedByUserId: userId, accepted: null },
+    });
+    return invitations;
+  };
+
+  // socket4(invitaions테이블 만들기)
+  createInvitations = async (
+    workspaceId: number,
+    invitedUserId: number,
+    invitedByUserId: number,
+  ) => {
+    const createdInvitations = await prisma.invitations.create({
+      data: {
+        WorkspaceId: workspaceId,
+        InvitedUserId: invitedUserId, // 초대한 사람
+        InvitedByUserId: invitedByUserId, // 초대 받은 사람
+      },
+    });
+    return createdInvitations;
+  };
+
+  // socket5(invitations테이블 - accepted상태 업데이트하기)
+  updateAcceptanceInvitations = async (
+    invitationId: number,
+    accepted: boolean,
+  ) => {
+    const updatedInvitations = await prisma.invitations.update({
+      where: { invitationId },
+      data: { accepted },
+    });
+    return updatedInvitations;
+  };
+
+  // socket6(유저 lastLogin업데이트)
+  updateLastloginUser = async (loginUser: number, now: Date) => {
+    const updatedUser = await prisma.users.update({
+      where: { userId: loginUser },
+      data: { lastLogin: now },
+    });
+    return updatedUser;
+  };
 }
 
 export default UsersRepository;
