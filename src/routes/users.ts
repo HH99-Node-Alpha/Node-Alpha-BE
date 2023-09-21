@@ -9,5 +9,6 @@ const usersService = new UsersService(usersRepository);
 const usersController = new UsersController(usersService);
 
 router.get('/', usersController.getUserWorkspacesAndBoards);
+router.get('/search', usersController.searchUser);
 
 export default router;

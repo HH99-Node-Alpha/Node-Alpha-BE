@@ -8,6 +8,11 @@ class UsersService {
       await this.usersRepository.getUserWorkspacesAndBoards(userId);
     return result;
   };
+
+  searchUser = async (email: string, name: string) => {
+    const result = await this.usersRepository.searchUser(email, name);
+    return result;
+  };
 }
 
 export default UsersService;
