@@ -80,7 +80,7 @@ router.post(
         },
       });
 
-      return res.status(200).json({ message: '로그인에 성공했습니다.' });
+      return res.status(200).json({ data: {userId: user.userId, username: user.name} });
     } catch (err) {
       next(err);
     }
@@ -188,11 +188,11 @@ router.post(
           expiresIn: '1h',
         },
       );
-      res.cookie('newAccessToken', newAccessToken, cookieOptions);
+      res.cookie('Authorizaion', newAccessToken, cookieOptions);
 
       return res
         .status(200)
-        .json({ message: '리프레시 토큰 검증에 성공하였습니다.' });
+        .json({ newAccessToken });
     } catch (err) {
       res.clearCookie('Authorization');
       res.clearCookie('refreshToken');
