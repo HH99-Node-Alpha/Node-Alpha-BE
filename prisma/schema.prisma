@@ -16,8 +16,13 @@ model Users {
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
   refreshToken String?   @db.Text
+  lastLogin    DateTime?
 
   WorkspacesMembers WorkspacesMembers[]
+
+  InvitedTo       Invitations[] @relation("InvitedUserRelation")
+  InvitedBy       Invitations[] @relation("InvitedByUserRelation")
+
 
   @@map("Users")
 }
@@ -32,6 +37,8 @@ model Workspaces {
 
   WorkspacesMembers WorkspacesMembers[]
   Boards            Boards[]
+
+  Invitations      Invitations[]
 
   @@map("Workspaces")
 }
@@ -114,3 +121,20 @@ model Colors {
   Board            Boards? @relation("BoardToColor")
   Card             Cards?  @relation("CardToColor")
  }
+
+model Invitations {
+  invitationId     Int      @id @default(autoincrement()) @map("id")
+  WorkspaceId      Int
+  InvitedUserId    Int
+  InvitedByUserId  Int
+  accepted         Boolean?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
+
+  Workspace       Workspaces   @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
+  InvitedUser     Users        @relation("InvitedUserRelation", fields: [InvitedUserId], references: [userId], onDelete: Cascade)
+  InvitedByUser   Users        @relation("InvitedByUserRelation", fields: [InvitedByUserId], references: [userId], onDelete: Cascade)
+
+  @@map("Invitations")
+}
