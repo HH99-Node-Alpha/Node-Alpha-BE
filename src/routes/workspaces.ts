@@ -1,18 +1,23 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import authMiddleware from '../middlewares/auth';
+import WorkspacesRepository from '../repositories/workspace';
+import WorkspacesService from '../services/workspace';
+import WorkspacesController from '../controllers/workspace';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
-
+const workspacesRepository = new WorkspacesRepository();
+const workspacesService = new WorkspacesService(workspacesRepository);
+const workspacesController = new WorkspacesController(workspacesService);
 
 //** PB내용 수정해야할거 ***/
-// express 전역 써서 하기 -> 아래꺼써서 하기 
+// express 전역 써서 하기 -> 아래꺼써서 하기
 // const user: any = req.user!;
 // const userId = user.userId;
 
-//  ** 워크스페이스 API 비즈니스 로직** 
+//  ** 워크스페이스 API 비즈니스 로직**
 
 // 1. 워크스페이스를 작성하려는 클라이언트가 로그인된 사용자인지 검증합니다.
 // 2. 워스페이스 생성을 위한 `workspacename`를 **body**로 전달받습니다.
@@ -36,27 +41,7 @@ const router = express.Router();
 // });
 // 전역 express 사용하기 // const user: any = req.user!; //const userId = user.userId;
 
-
-router.post('/create', authMiddleware, async (req, res) => {
-  try {
-    const { workspaceName } = req.body;
-    const user: any = req.user!;
-    const ownerId = user.userId;
-
-    // ownerId를 사용해서 워크스페이스 생성
-    const workspace = await prisma.workspaces.create({
-      data: {
-        workspaceName,
-        ownerId,
-      },
-    });
-    
-    res.json(workspace);
-  } catch (error) {
-    console.error('Error message:', error);
-    res.status(500).send('error');
-  }
-});
+router.post('/', workspacesController.createWorkspace);
 
 //** 워크스페이스 조회 **//
 // router.get('/:workspaceId', authMiddleware, async (req, res) => {
@@ -83,7 +68,6 @@ router.post('/create', authMiddleware, async (req, res) => {
 //     res.status(500).send('error');
 //   }
 // });
-
 
 router.get('/:workspaceId', authMiddleware, async (req, res) => {
   try {
@@ -112,7 +96,6 @@ router.get('/:workspaceId', authMiddleware, async (req, res) => {
   }
 });
 
-
 router.get('/', authMiddleware, async (req, res) => {
   try {
     const user: any = req.user!;
@@ -123,7 +106,7 @@ router.get('/', authMiddleware, async (req, res) => {
         ownerId: userId,
       },
     });
-    
+
     res.json(workspaces);
   } catch (error) {
     console.error('Error message', error);
@@ -131,14 +114,12 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 });
 
-
-
 //** 워크스페이스 수정 **//
 // router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 //   try {
 //     const { workspaceId, userId} = req.params;
 //     const { workspaceName } = req.body;
-    
+
 //     // workspace를 조회
 //     const workspace = await prisma.workspaces.findUnique({
 //       where: {
@@ -184,7 +165,6 @@ router.get('/', authMiddleware, async (req, res) => {
 //     res.status(500).send('error');
 //   }
 // });
-     
 
 router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
   try {
@@ -228,11 +208,7 @@ router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
   }
 });
 
-
 //** 워크스페이스 삭제 **//
-
-
-
 
 // router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 //   try {
@@ -280,14 +256,11 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
     });
 
     res.json(deletedWorkspace);
-
   } catch (error) {
     console.error('Error message:', error);
     res.status(500).send('error');
   }
 });
-
-
 
 // // ** 워크스페이스 멤버 ** //
 
@@ -300,7 +273,6 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 // type FetchWorkspaceMemberParams = {
 //   id: string;
 // };
-
 
 // router.post('/workspace-member', async (req, res) => {
 //   try {
@@ -321,7 +293,7 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 //           data: {
 //               WorkspaceId: data.WorkspaceId,
 //               UserId: data.UserId,
-//               // ownerId: workspace.ownerId  
+//               // ownerId: workspace.ownerId
 //               //  // ***** 여기 왜 안됨? ㅠㅠㅠㅠ
 //           },
 //       });
@@ -332,7 +304,6 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 //       res.status(500).json({ error: "error" });
 //   }
 // });
-
 
 // router.get('/workspace-member/:id', async (req, res) => {
 //   try {
