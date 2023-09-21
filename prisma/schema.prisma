@@ -120,7 +120,7 @@ model Colors {
   backgroundUrl    String?
   Board            Boards? @relation("BoardToColor")
   Card             Cards?  @relation("CardToColor")
- }
+}
 
 model Invitations {
   invitationId     Int      @id @default(autoincrement()) @map("id")

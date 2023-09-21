@@ -18,7 +18,6 @@ const router = express.Router();
 // 2. 워스페이스 생성을 위한 `workspacename`를 **body**로 전달받습니다.
 // 3. **workspaces** 테이블에 게시글을 생성합니다.
 
-
 //** 워크스페이스생성 **//
 // router.post('/create', authMiddleware, async (req, res) => {
 //   try {
@@ -58,8 +57,6 @@ router.post('/create', authMiddleware, async (req, res) => {
     res.status(500).send('error');
   }
 });
-
-
 
 //** 워크스페이스 조회 **//
 // router.get('/:workspaceId', authMiddleware, async (req, res) => {
@@ -225,7 +222,6 @@ router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
     });
 
     res.json(updatedWorkspace);
-
   } catch (error) {
     console.error('Error', error);
     res.status(500).send('error');
@@ -279,7 +275,7 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
     // 검증 후 workspace 삭제
     const deletedWorkspace = await prisma.workspaces.delete({
       where: {
-        workspaceId: +workspaceId
+        workspaceId: +workspaceId,
       },
     });
 
@@ -355,10 +351,4 @@ router.delete('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
 //   }
 // });
 
-
-
 export default router;
-
-
-
-
