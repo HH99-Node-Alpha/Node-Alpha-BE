@@ -41,6 +41,40 @@ class UsersRepository {
 
     return true;
   };
+
+  searchUser = async (email: string, name: string) => {
+    const filters = [];
+
+    if (email) {
+      filters.push({
+        email: {
+          contains: email as string,
+        },
+      });
+    }
+
+    if (name) {
+      filters.push({
+        name: {
+          contains: name as string,
+        },
+      });
+    }
+
+    const result = await prisma.users.findMany({
+      where: {
+        OR: filters,
+      },
+      select: {
+        userId: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    console.log(email, name, result);
+    return result;
+  };
 }
 
 export default UsersRepository;
