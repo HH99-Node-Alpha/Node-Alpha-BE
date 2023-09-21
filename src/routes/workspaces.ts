@@ -4,11 +4,15 @@ import authMiddleware from '../middlewares/auth';
 import WorkspacesRepository from '../repositories/workspace';
 import WorkspacesService from '../services/workspace';
 import WorkspacesController from '../controllers/workspace';
+import BoardsRepository from '../repositories/boards';
+import UsersRepository from '../repositories/users';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
-const workspacesRepository = new WorkspacesRepository();
+const usersRepository = new UsersRepository();
+const boardsRepository = new BoardsRepository(usersRepository);
+const workspacesRepository = new WorkspacesRepository(boardsRepository);
 const workspacesService = new WorkspacesService(workspacesRepository);
 const workspacesController = new WorkspacesController(workspacesService);
 
