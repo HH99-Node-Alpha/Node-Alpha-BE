@@ -15,6 +15,12 @@ class ColumnsController {
     const boardId = +req.params.boardId;
     const { columnName } = req.body;
     const result = await this.columnsService.createColumn(boardId, columnName);
+
+    if (result) {
+      const io = req.app.get('io');
+      io.of('/board').emit('addColumn', result);
+    }
+
     res.status(200).send(result);
   });
 
@@ -35,7 +41,7 @@ class ColumnsController {
     // update될 때마다, 해당 방의 모든 사용자에게 정보 전송해서 업데이트(실시간으로)
     if (result) {
       const io = req.app.get('io');
-      io.of('/board').emit('updateColumnOrder', result);
+      io.of('/board').emit('updateColumn', result);
     }
 
     res.status(200).send(result);
@@ -51,6 +57,12 @@ class ColumnsController {
       workspaceId,
       columnId,
     );
+
+    if (result) {
+      const io = req.app.get('io');
+      io.of('/board').emit('deleteColumn', result);
+    }
+
     res.status(200).send(result);
   });
 }
