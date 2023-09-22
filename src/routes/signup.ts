@@ -6,7 +6,6 @@ import WorkspacesRepository from '../repositories/workspace';
 import BoardsRepository from '../repositories/boards';
 import UsersRepository from '../repositories/users';
 
-
 const router = express.Router();
 const signupRepository = new SignupRepository();
 const usersRepository = new UsersRepository();
@@ -18,9 +17,6 @@ const signupController = new SignupController(signupService);
 router.post('/signup', signupController.signupUser);
 
 export default router;
-
-
-
 
 /** 분리하기 전에 코드 */
 // import express, { Request, Response, NextFunction } from 'express';
