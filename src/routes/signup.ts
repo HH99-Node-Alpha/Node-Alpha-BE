@@ -3,20 +3,20 @@ import SignupController from '../controllers/signup';
 import SignupRepository from '../repositories/signup';
 import SignupService from '../services/signup';
 import WorkspacesRepository from '../repositories/workspace';
-
+import BoardsRepository from '../repositories/boards';
+import UsersRepository from '../repositories/users';
 
 const router = express.Router();
 const signupRepository = new SignupRepository();
-const workspacesRepository = new WorkspacesRepository(); //여기 연결 어떻게 하는지
+const usersRepository = new UsersRepository();
+const boardsRepository = new BoardsRepository(usersRepository);
+const workspacesRepository = new WorkspacesRepository(boardsRepository); //여기 연결 어떻게 하는지
 const signupService = new SignupService(signupRepository, workspacesRepository);
 const signupController = new SignupController(signupService);
 
 router.post('/signup', signupController.signupUser);
 
 export default router;
-
-
-
 
 /** 분리하기 전에 코드 */
 // import express, { Request, Response, NextFunction } from 'express';
