@@ -117,13 +117,23 @@ class UsersRepository {
   };
 
   // socket5(invitations테이블 - accepted상태 업데이트하기)
-  updateAcceptanceInvitations = async (
-    invitationId: number,
-    accepted: boolean,
-  ) => {
+  acceptInvitations = async (invitationId: number, accepted: boolean) => {
     const updatedInvitations = await prisma.invitations.update({
       where: { invitationId },
       data: { accepted },
+    });
+    return updatedInvitations;
+  };
+
+  // socket5-2(invitations테이블 - accepted: false, 인자는 3개)
+  declineInvitations = async (
+    invitationId: number,
+    accepted: boolean,
+    deletedAt: Date,
+  ) => {
+    const updatedInvitations = await prisma.invitations.update({
+      where: { invitationId },
+      data: { accepted, deletedAt },
     });
     return updatedInvitations;
   };

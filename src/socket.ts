@@ -41,11 +41,25 @@ const WebSocket = (server: HttpServer, app: Application) => {
         message: `(타인)${socket.id}님이 ${boardId}번 board에 입장했습니다`,
       });
 
-      // 칼럼 순서 변경 - 실시간 공지 -> /controllers/columns.ts의 updated에서 처리
-      socket.on('columnToServer', async (data: any) => {
+      // 1-1.칼럼 추가
+      socket.on('addToServer', async (data: any) => {
         console.log(data);
-        socket.emit('columnToClient', '본인이 순서 변경');
-        socket.to(boardId).emit('columnToClient', '타인이 순서 변경');
+        socket.emit('addToClient', '본인이 추가'); // 체크용
+        socket.to(boardId).emit('addToClient', '타인이 추가'); // 체크용
+      });
+
+      // 1-2.칼럼 수정
+      socket.on('changeToServer', async (data: any) => {
+        console.log(data);
+        socket.emit('changeToClient', '본인이 순서 변경'); // 체크용
+        socket.to(boardId).emit('changeToClient', '타인이 순서 변경'); // 체크용
+      });
+
+      // 1-3.칼럼 삭제
+      socket.on('deleteToServer', async (data: any) => {
+        console.log(data);
+        socket.emit('deleteToClient', '본인이 삭제'); // 체크용
+        socket.to(boardId).emit('deleteToClient', '타인이 삭제'); // 체크용
       });
     });
   });
@@ -117,15 +131,17 @@ const WebSocket = (server: HttpServer, app: Application) => {
           data.workspaceId,
           loginUser, // userId를 위에서 만든 loginUser로 대체
         );
-        await usersRepository.updateAcceptanceInvitations(
+        await usersRepository.acceptInvitations(
           data.invitationId,
           data.accepted,
         );
         socket.emit('confirmInvitation', '초대를 승낙하였습니다');
       } else {
-        await usersRepository.updateAcceptanceInvitations(
+        const deletedAt = new Date(); // Soft delete
+        await usersRepository.declineInvitations(
           data.invitationId,
           data.accepted,
+          deletedAt,
         );
         socket.emit('confirmInvitation', '초대를 거절하였습니다');
       }
