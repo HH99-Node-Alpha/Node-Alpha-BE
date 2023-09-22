@@ -16,6 +16,7 @@ class SignupRepository {
                 password: hashedPassword,
             },
         });
+
         return result;
     }
 }
