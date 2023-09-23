@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { CustomExpressRequest } from '../../types/login';
 import asyncHandler from '../lib/asyncHandler';
 import BoardsService from '../services/boards';
 
@@ -24,34 +25,37 @@ class BoardsController {
     res.status(200).send(result);
   });
 
-  updateBoard = asyncHandler(async (req: Request, res: Response) => {
-    const user: any = req.user!;
-    const userId = user.userId;
-    const workspaceId = +req.params.workspaceId;
-    const boardId = +req.params.boardId;
-    const { boardName, colorId } = req.body;
-    const result = await this.boardsService.updateBoard(
-      userId,
-      workspaceId,
-      boardId,
-      boardName,
-      colorId,
-    );
-    res.status(200).send(result);
-  });
+  updateBoard = asyncHandler(
+    async (req: CustomExpressRequest, res: Response) => {
+      const user: any = req.user!;
+      const userId = user.userId;
+      const workspaceId = +req.params.workspaceId;
+      const boardId = +req.params.boardId;
+      const { boardName, colorId } = req.body;
+      const result = await this.boardsService.updateBoard(
+        userId,
+        workspaceId,
+        boardId,
+        boardName,
+        colorId,
+      );
+      res.status(200).send(result);
+    },
+  );
 
-  deleteBoard = asyncHandler(async (req: Request, res: Response) => {
-    const user: any = req.user!;
-    const userId = user.userId;
-    const workspaceId = +req.params.workspaceId;
-    const boardId = +req.params.boardId;
-    const result = await this.boardsService.deleteBoard(
-      userId,
-      workspaceId,
-      boardId,
-    );
-    res.status(200).send(result);
-  });
+  deleteBoard = asyncHandler(
+    async (req: CustomExpressRequest, res: Response) => {
+      const userId = req.user.userId;
+      const workspaceId = +req.params.workspaceId;
+      const boardId = +req.params.boardId;
+      const result = await this.boardsService.deleteBoard(
+        userId,
+        workspaceId,
+        boardId,
+      );
+      res.status(200).send(result);
+    },
+  );
 
   getAllColors = asyncHandler(async (req: Request, res: Response) => {
     const result = await this.boardsService.getAllColors();
