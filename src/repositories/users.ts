@@ -102,12 +102,25 @@ class UsersRepository {
   };
 
   // socket3(invitaions테이블 전체 조회)
-  getInvitations = async (userId: number) => {
+  getInvitations = async (userId: number, userName: any) => {
     try {
       const invitations = await prisma.invitations.findMany({
         where: { InvitedByUserId: userId, accepted: null },
       });
-      return invitations;
+
+      // invitations 깊은복사
+      const result = JSON.parse(JSON.stringify(invitations));
+
+      for (let i = 0; i < result.length; i++) {
+        const workspaceName = await prisma.workspaces.findUnique({
+          where: { workspaceId: result[i].WorkspaceId },
+          select: { workspaceName: true },
+        });
+        result[i]['workspaceName'] = workspaceName?.workspaceName;
+        result[i]['userName'] = userName;
+      }
+      // console.log('result:', result);
+      return result;
     } catch (err) {
       throw new CustomError(412, '입력값이 올바르지 않습니다');
     }
@@ -165,15 +178,11 @@ class UsersRepository {
 
   // socket6(유저 lastLogin업데이트)
   updateLastloginUser = async (loginUser: any, now: Date) => {
-    try {
-      const updatedUser = await prisma.users.update({
-        where: { userId: loginUser },
-        data: { lastLogin: now },
-      });
-      return updatedUser;
-    } catch (err) {
-      throw new CustomError(412, '입력값이 올바르지 않습니다');
-    }
+    const updatedUser = await prisma.users.update({
+      where: { userId: loginUser },
+      data: { lastLogin: now },
+    });
+    return updatedUser;
   };
 
   // socket7(workspace조회용 - 임시로 여기에 새로 만들고, 배치)
