@@ -81,7 +81,7 @@ const WebSocket = (server: HttpServer, app: Application) => {
       socket.user = user; // lastLogin담을 용도
       const loginLog = user?.lastLogin || null;
       const userName = user?.name;
-      const invitations = await usersRepository.getInvitations(data);
+      const invitations = await usersRepository.getInvitations(data, userName);
 
       let inviteResult: any = '';
       // 1)초대목록이 없는 경우
@@ -91,25 +91,19 @@ const WebSocket = (server: HttpServer, app: Application) => {
       }
       // 2)초대목록이 있다면
       else {
-        const workspaceId = invitations[0].WorkspaceId;
-        const workspaceName =
-          await usersRepository.getWorkspaceName(workspaceId);
         // 2-1)접속한 적이 있으면
         if (loginLog) {
           inviteResult = invitations.filter(
             (invitation: any) =>
               new Date(invitation.createdAt) > new Date(loginLog),
           );
+          // console.log('최종확인:', invitations);
           // 2-2)최초 접속(회원가입만 하고, 접속x경우 -> loginLog가 없음)
         } else {
           inviteResult = invitations;
         }
-        socket.emit('loginAndAlarm', {
-          loginLog,
-          inviteResult,
-          userName,
-          workspaceName,
-        });
+        console.log(inviteResult);
+        socket.emit('loginAndAlarm', { loginLog, inviteResult });
       }
     });
 
@@ -159,17 +153,18 @@ const WebSocket = (server: HttpServer, app: Application) => {
     socket.on('disconnect', async () => {
       console.log('event접속해제: ', socket.id);
       console.log('접속해제시 유저', socket.user);
+      if (!socket.user) {
+        return console.log('유저가 없음');
+      }
       const now = new Date();
       await usersRepository.updateLastloginUser(socket.user.userId, now);
+
       clearInterval(interval);
     });
   });
 };
 
 export default WebSocket;
-
-// const loginUser = socket.handshake.query.userId;
-// console.log('로그아웃시 잘 찍히냐:', loginUser);
 
 // [ Not yet ]
 // (2-2)카드 순서 변경 -> /controllers/cards.ts에 추가

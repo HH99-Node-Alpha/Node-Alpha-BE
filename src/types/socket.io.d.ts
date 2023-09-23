@@ -4,6 +4,10 @@ declare module 'socket.io' {
   }
 }
 
+export interface invitations {
+  workspaceName?: any;
+}
+
 // import { Socket as IOSocket } from "socket.io";
 
 // declare module 'socket.io' {
