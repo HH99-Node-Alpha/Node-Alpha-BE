@@ -5,7 +5,6 @@ import prisma from './utils/prisma';
 import UsersRepository from './repositories/users';
 
 const usersRepository = new UsersRepository();
-
 const interval: number = 3000;
 
 const WebSocket = (server: HttpServer, app: Application) => {
@@ -20,18 +19,18 @@ const WebSocket = (server: HttpServer, app: Application) => {
   const event = io.of('/main'); // for '워크스페이스'초대
 
   /** 1. board접속 및 컬럼 순서 변경 */
-  board.on('connection', (socket) => {
+  board.on('connection', (socket: any) => {
     console.log('board접속:', socket.id);
     socket.on('disconnect', () => {
       console.log('board접속해제', socket.id);
       clearInterval(interval);
     });
 
-    socket.on('error', (error) => {
+    socket.on('error', (error: any) => {
       console.error(error);
     });
 
-    socket.on('join', (boardId) => {
+    socket.on('join', (boardId: any) => {
       socket.join(boardId); // 전달받은 boardRoomId에 접속
       console.log('현재 접속중인 socket.id와 boardRoom번호:', socket.rooms);
       socket.emit('join', {
@@ -44,7 +43,7 @@ const WebSocket = (server: HttpServer, app: Application) => {
       // 1-1.칼럼 추가
       socket.on('addToServer', async (data: any) => {
         console.log(data);
-        socket.emit('addToClient', '본인이 추가'); // 체크용
+        socket.emit('addToClient', '본인이 추가'); // *두번 들어가는 경우도 있대 확인하기
         socket.to(boardId).emit('addToClient', '타인이 추가'); // 체크용
       });
 
@@ -65,22 +64,24 @@ const WebSocket = (server: HttpServer, app: Application) => {
   });
 
   /** 2. event - 초대 */
-  event.on('connection', (socket) => {
+  event.on('connection', (socket: any) => {
     console.log('event접속:', socket.id);
-    const loginUser = Number(socket.handshake.query.userId);
+    // console.log('여기서:', socket.handshake.query.userId);
+    // const loginUser = socket.handshake.query.userId;
+    // console.log('로그인 유저', loginUser);
 
-    socket.on('error', (error) => {
+    socket.on('error', (error: any) => {
       console.error(error);
     });
 
     // A. loginAndAlarm
     // main접속 -> (1)가장 최근 로그인 기록이 나오고 & (2)접속끊은 이후에 온 초대 메세지 확인
-    socket.on('loginAndAlarm', async (data) => {
-      const userId = data.userId;
-      const user = await usersRepository.getUser(userId);
+    socket.on('loginAndAlarm', async (data: any) => {
+      const user = await usersRepository.getUser(data);
+      socket.user = user; // lastLogin담을 용도
       const loginLog = user?.lastLogin || null;
-
-      const invitations = await usersRepository.getInvitations(userId);
+      const userName = user?.name;
+      const invitations = await usersRepository.getInvitations(data);
 
       let inviteResult: any = '';
       // 1)초대목록이 없는 경우
@@ -90,6 +91,9 @@ const WebSocket = (server: HttpServer, app: Application) => {
       }
       // 2)초대목록이 있다면
       else {
+        const workspaceId = invitations[0].WorkspaceId;
+        const workspaceName =
+          await usersRepository.getWorkspaceName(workspaceId);
         // 2-1)접속한 적이 있으면
         if (loginLog) {
           inviteResult = invitations.filter(
@@ -100,7 +104,12 @@ const WebSocket = (server: HttpServer, app: Application) => {
         } else {
           inviteResult = invitations;
         }
-        socket.emit('loginAndAlarm', { loginLog, inviteResult });
+        socket.emit('loginAndAlarm', {
+          loginLog,
+          inviteResult,
+          userName,
+          workspaceName,
+        });
       }
     });
 
@@ -125,11 +134,11 @@ const WebSocket = (server: HttpServer, app: Application) => {
     });
 
     // C. 초대 승낙/거절 - user Router에서 마무리
-    socket.on('confirmInvitation', async (data) => {
-      if (data) {
+    socket.on('confirmInvitation', async (data: any) => {
+      if (data.accepted) {
         await usersRepository.createWorkspaceMember(
           data.workspaceId,
-          loginUser, // userId를 위에서 만든 loginUser로 대체
+          data.InvitedByUserId, // userId를 위에서 만든 loginUser로 대체
         );
         await usersRepository.acceptInvitations(
           data.invitationId,
@@ -149,16 +158,18 @@ const WebSocket = (server: HttpServer, app: Application) => {
 
     socket.on('disconnect', async () => {
       console.log('event접속해제: ', socket.id);
-      console.log(loginUser); // 체크용
-      // 로그아웃 시간 업데이트
+      console.log('접속해제시 유저', socket.user);
       const now = new Date();
-      await usersRepository.updateLastloginUser(loginUser, now);
+      await usersRepository.updateLastloginUser(socket.user.userId, now);
       clearInterval(interval);
     });
   });
 };
 
 export default WebSocket;
+
+// const loginUser = socket.handshake.query.userId;
+// console.log('로그아웃시 잘 찍히냐:', loginUser);
 
 // [ Not yet ]
 // (2-2)카드 순서 변경 -> /controllers/cards.ts에 추가
