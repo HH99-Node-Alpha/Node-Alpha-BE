@@ -1,6 +1,8 @@
 import prisma from '../utils/prisma/index';
+import UsersRepository from './users';
 
 class ColumnsRepository {
+  constructor(private readonly usersRepository: UsersRepository) {}
   getAllColumns = async (boardId: number) => {
     const columns = await prisma.columns.findMany({
       where: { BoardId: boardId },
@@ -46,38 +48,58 @@ class ColumnsRepository {
   };
 
   updateColumn = async (
+    userId: number,
+    workspaceId: number,
     columnId: number,
     columnName?: string,
     columnOrder?: number,
   ) => {
-    const dataToUpdate: any = {};
+    const isMember = await this.usersRepository.isMemberOfWorkspace(
+      userId,
+      workspaceId,
+    );
 
-    if (columnName) {
-      dataToUpdate.columnName = columnName;
+    if (isMember) {
+      const dataToUpdate: any = {};
+
+      if (columnName) {
+        dataToUpdate.columnName = columnName;
+      }
+
+      if (columnOrder !== undefined) {
+        dataToUpdate.columnOrder = columnOrder;
+      }
+
+      const updatedColumn = await prisma.columns.update({
+        where: { columnId: columnId },
+        data: dataToUpdate,
+      });
+
+      return {
+        columnId: String(updatedColumn.columnId),
+        columnName: updatedColumn.columnName,
+        columnOrder: updatedColumn.columnOrder,
+      };
     }
-
-    if (columnOrder !== undefined) {
-      dataToUpdate.columnOrder = columnOrder;
-    }
-
-    const updatedColumn = await prisma.columns.update({
-      where: { columnId: columnId },
-      data: dataToUpdate,
-    });
-
-    return {
-      columnId: String(updatedColumn.columnId),
-      columnName: updatedColumn.columnName,
-      columnOrder: updatedColumn.columnOrder,
-    };
   };
 
-  deleteColumn = async (columnId: number) => {
-    await prisma.columns.delete({
-      where: { columnId },
-    });
+  deleteColumn = async (
+    userId: number,
+    workspaceId: number,
+    columnId: number,
+  ) => {
+    const isMember = await this.usersRepository.isMemberOfWorkspace(
+      userId,
+      workspaceId,
+    );
 
-    return { message: 'success' };
+    if (isMember) {
+      await prisma.columns.delete({
+        where: { columnId },
+      });
+
+      return { message: 'success' };
+    }
   };
 }
 

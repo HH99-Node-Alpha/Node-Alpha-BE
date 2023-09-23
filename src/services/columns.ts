@@ -17,11 +17,15 @@ class ColumnsService {
   };
 
   updateColumn = async (
+    userId: number,
+    workspaceId: number,
     columnId: number,
     columnName?: string,
     columnOrder?: number,
   ) => {
     const result = await this.columnsRepository.updateColumn(
+      userId,
+      workspaceId,
       columnId,
       columnName,
       columnOrder,
@@ -29,8 +33,16 @@ class ColumnsService {
     return result;
   };
 
-  deleteColumn = async (columnId: number) => {
-    const result = await this.columnsRepository.deleteColumn(columnId);
+  deleteColumn = async (
+    userId: number,
+    workspaceId: number,
+    columnId: number,
+  ) => {
+    const result = await this.columnsRepository.deleteColumn(
+      userId,
+      workspaceId,
+      columnId,
+    );
     return result;
   };
 }

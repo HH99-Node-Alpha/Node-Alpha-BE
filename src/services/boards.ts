@@ -19,20 +19,37 @@ class BoardsService {
   };
 
   updateBoard = async (
+    userId: number,
+    workspaceId: number,
     boardId: number,
     boardName?: string,
-    boardColor?: string,
+    colorId?: number,
   ) => {
     const result = await this.boardsRepository.updateBoard(
+      userId,
+      workspaceId,
       boardId,
       boardName,
-      boardColor,
+      colorId,
     );
     return result;
   };
 
-  deleteBoard = async (boardId: number) => {
-    const result = await this.boardsRepository.deleteBoard(boardId);
+  deleteBoard = async (
+    userId: number,
+    workspaceId: number,
+    boardId: number,
+  ) => {
+    const result = await this.boardsRepository.deleteBoard(
+      userId,
+      workspaceId,
+      boardId,
+    );
+    return result;
+  };
+
+  getAllColors = async () => {
+    const result = await this.boardsRepository.getAllColors();
     return result;
   };
 }

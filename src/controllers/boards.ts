@@ -25,19 +25,36 @@ class BoardsController {
   });
 
   updateBoard = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const boardId = +req.params.boardId;
-    const { boardName, boardColor } = req.body;
+    const { boardName, colorId } = req.body;
     const result = await this.boardsService.updateBoard(
+      userId,
+      workspaceId,
       boardId,
       boardName,
-      boardColor,
+      colorId,
     );
     res.status(200).send(result);
   });
 
   deleteBoard = asyncHandler(async (req: Request, res: Response) => {
+    const user: any = req.user!;
+    const userId = user.userId;
+    const workspaceId = +req.params.workspaceId;
     const boardId = +req.params.boardId;
-    const result = await this.boardsService.deleteBoard(boardId);
+    const result = await this.boardsService.deleteBoard(
+      userId,
+      workspaceId,
+      boardId,
+    );
+    res.status(200).send(result);
+  });
+
+  getAllColors = asyncHandler(async (req: Request, res: Response) => {
+    const result = await this.boardsService.getAllColors();
     res.status(200).send(result);
   });
 }

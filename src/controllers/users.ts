@@ -7,11 +7,23 @@ class UsersController {
 
   getUserWorkspacesAndBoards = asyncHandler(
     async (req: Request, res: Response) => {
-      const userId = 1;
+      const user: any = req.user!;
+      const userId = user.userId;
       const result = await this.usersService.getUserWorkspacesAndBoards(userId);
       res.status(200).json(result);
     },
   );
+
+  searchUser = asyncHandler(async (req: Request, res: Response) => {
+    const { email, name } = req.query;
+    if (typeof email !== 'string' || typeof name !== 'string') {
+      res.status(400).json({ error: 'Invalid parameters' });
+      return;
+    }
+    const result = await this.usersService.searchUser(email, name);
+
+    res.status(200).json(result);
+  });
 }
 
 export default UsersController;
