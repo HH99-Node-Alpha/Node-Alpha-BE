@@ -17,6 +17,7 @@ model Users {
   deletedAt    DateTime?
   refreshToken String?   @db.Text
   lastLogin    DateTime?
+  tmpSocket    String?
 
   WorkspacesMembers WorkspacesMembers[]
 
@@ -28,12 +29,13 @@ model Users {
 }
 
 model Workspaces {
-  workspaceId   Int       @id @default(autoincrement()) @map("id")
-  workspaceName String    @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-  ownerId       Int
+  workspaceId    Int       @id @default(autoincrement()) @map("id")
+  workspaceName  String    
+  workspaceImage String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  ownerId        Int
 
   WorkspacesMembers WorkspacesMembers[]
   Boards            Boards[]
@@ -67,7 +69,7 @@ model Boards {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
-  colorId  Int      @unique
+  colorId  Int    
   
   Color    Colors   @relation("BoardToColor", fields: [colorId], references: [colorId])
   Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
@@ -114,12 +116,12 @@ model Cards {
 }
 
 model Colors {
-  colorId          Int     @id @default(autoincrement()) @map("id")
-  startColor       String?  
-  endColor         String? 
-  backgroundUrl    String?
-  Board            Boards? @relation("BoardToColor")
-  Card             Cards?  @relation("CardToColor")
+  colorId     Int     @id @default(autoincrement()) @map("id")
+  startColor  String?  
+  endColor    String? 
+  backgroundUrl String?
+  Boards      Boards[]  @relation("BoardToColor")
+  Card        Cards?    @relation("CardToColor")
 }
 
 model Invitations {
