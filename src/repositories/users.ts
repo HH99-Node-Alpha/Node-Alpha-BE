@@ -196,6 +196,19 @@ class UsersRepository {
       throw new CustomError(412, '입력값이 올바르지 않습니다');
     }
   };
+
+  // socket8(User에 tmpSocketId추가용) -> db조회 안하고, 관리하는 방법 해결(clients객체로)
+  // addSocketId = async (userId: number, socketId: string) => {
+  //   try {
+  //     const updatedUser = await prisma.users.update({
+  //       where: { userId },
+  //       data: { tmpSocket: socketId },
+  //     });
+  //     return updatedUser;
+  //   } catch (err) {
+  //     throw new CustomError(412, '입력값이 올바르지 않습니다');
+  //   }
+  // };
 }
 
 export default UsersRepository;

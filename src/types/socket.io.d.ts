@@ -1,6 +1,7 @@
 declare module 'socket.io' {
   interface Socket {
     user?: any;
+    // pairs?: any;
   }
 }
 
