@@ -17,13 +17,8 @@ model Users {
   deletedAt    DateTime?
   refreshToken String?   @db.Text
   lastLogin    DateTime?
-  tmpSocket    String?
 
   WorkspacesMembers WorkspacesMembers[]
-
-  InvitedTo       Invitations[] @relation("InvitedUserRelation")
-  InvitedBy       Invitations[] @relation("InvitedByUserRelation")
-
 
   @@map("Users")
 }
@@ -39,43 +34,41 @@ model Workspaces {
 
   WorkspacesMembers WorkspacesMembers[]
   Boards            Boards[]
-
-  Invitations      Invitations[]
+  Invitations       Invitations[]
+  WorkspacesMembers WorkspacesMembers[]
 
   @@map("Workspaces")
 }
 
 model WorkspacesMembers {
-  memberId    Int       @id @default(autoincrement()) @map("id")
+  memberId    Int        @id @default(autoincrement()) @map("id")
   WorkspaceId Int
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
   UserId      Int
+  User        Users      @relation(fields: [UserId], references: [userId], onDelete: Cascade)
+  Workspaces  Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
 
-  // Users 테이블과 관계를 설정 
-
-  User       Users      @relation(fields: [UserId], references: [userId], onDelete: Cascade)
-  Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
-
+  @@index([UserId], map: "WorkspacesMembers_UserId_fkey")
+  @@index([WorkspaceId], map: "WorkspacesMembers_WorkspaceId_fkey")
   @@map("WorkspacesMembers")
 }
 
 model Boards {
-  boardId     Int       @id @default(autoincrement()) @map("id")
+  boardId     Int        @id @default(autoincrement()) @map("id")
   WorkspaceId Int
   boardName   String
   boardColor  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   deletedAt   DateTime?
   colorId  Int    
   
   Color    Colors   @relation("BoardToColor", fields: [colorId], references: [colorId])
   Workspaces Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
 
-  Columns    Columns[]
-
+  @@index([WorkspaceId], map: "Boards_WorkspaceId_fkey")
   @@map("Boards")
 }
 
@@ -87,9 +80,10 @@ model Columns {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
   columnOrder Float
-  Boards      Boards    @relation(fields: [BoardId], references: [boardId], onDelete: Cascade)
   Cards       Cards[]
+  Boards      Boards    @relation(fields: [BoardId], references: [boardId], onDelete: Cascade)
 
+  @@index([BoardId], map: "Columns_BoardId_fkey")
   @@map("Columns")
 }
 
@@ -99,7 +93,7 @@ model Cards {
   cardDescription String
   imageUrl        String?
   cardColor       String?
-  worker          String? // 배열로할지 고민*
+  worker          String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?
@@ -107,11 +101,11 @@ model Cards {
   dueDate         DateTime
   MemberId        Int
   ColumnId        Int
-  colorId         Int      @unique
-  Color           Colors   @relation("CardToColor", fields: [colorId], references: [colorId])
+  colorId         Int       @unique
+  Columns         Columns   @relation(fields: [ColumnId], references: [columnId], onDelete: Cascade)
+  Color           Colors    @relation("CardToColor", fields: [colorId], references: [colorId])
 
-  Columns         Columns  @relation(fields: [ColumnId], references: [columnId], onDelete: Cascade)
-
+  @@index([ColumnId], map: "Cards_ColumnId_fkey")
   @@map("Cards")
 }
 
@@ -125,18 +119,20 @@ model Colors {
 }
 
 model Invitations {
-  invitationId     Int      @id @default(autoincrement()) @map("id")
-  WorkspaceId      Int
-  InvitedUserId    Int
-  InvitedByUserId  Int
-  accepted         Boolean?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  deletedAt        DateTime?
+  invitationId    Int        @id @default(autoincrement()) @map("id")
+  WorkspaceId     Int
+  InvitedUserId   Int
+  InvitedByUserId Int
+  accepted        Boolean?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+  InvitedByUser   Users      @relation("InvitedByUserRelation", fields: [InvitedByUserId], references: [userId], onDelete: Cascade)
+  InvitedUser     Users      @relation("InvitedUserRelation", fields: [InvitedUserId], references: [userId], onDelete: Cascade)
+  Workspace       Workspaces @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
 
-  Workspace       Workspaces   @relation(fields: [WorkspaceId], references: [workspaceId], onDelete: Cascade)
-  InvitedUser     Users        @relation("InvitedUserRelation", fields: [InvitedUserId], references: [userId], onDelete: Cascade)
-  InvitedByUser   Users        @relation("InvitedByUserRelation", fields: [InvitedByUserId], references: [userId], onDelete: Cascade)
-
+  @@index([InvitedByUserId], map: "Invitations_InvitedByUserId_fkey")
+  @@index([InvitedUserId], map: "Invitations_InvitedUserId_fkey")
+  @@index([WorkspaceId], map: "Invitations_WorkspaceId_fkey")
   @@map("Invitations")
 }
