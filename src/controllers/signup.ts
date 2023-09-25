@@ -27,7 +27,7 @@ class SignupController {
             throw new CustomError(412, '패스워드가 일치하지 않습니다.') //return { status: 412, message: '패스워드가 일치하지 않습니다.' };
         }
 
-        const user = await this.signupService.signupUser(email, name, password, confirm);
+        const result = await this.signupService.signupUser(email, name, password, confirm);
         res.status(200).json({ message: '회원가입에 성공했습니다.' });
   });       
 }

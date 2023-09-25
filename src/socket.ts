@@ -32,7 +32,6 @@ const WebSocket = (server: HttpServer, app: Application) => {
 
     socket.on('join', (boardId: any) => {
       socket.join(boardId); // 전달받은 boardRoomId에 접속
-      console.log('현재 접속중인 socket.id와 boardRoom번호:', socket.rooms);
       socket.emit('join', {
         message: `(본인)${socket.id}님은 ${boardId}번 board에 입장했습니다`,
       });
@@ -42,120 +41,160 @@ const WebSocket = (server: HttpServer, app: Application) => {
 
       // 1-1.칼럼 추가
       socket.on('addToServer', async (data: any) => {
-        console.log(data);
-        socket.emit('addToClient', '본인이 추가'); // *두번 들어가는 경우도 있대 확인하기
-        socket.to(boardId).emit('addToClient', '타인이 추가'); // 체크용
+        console.log('from서버:', data);
+        socket.emit('addToClient', '본인이 추가');
+        socket.to(boardId).emit('addToClient', '타인이 추가');
       });
 
       // 1-2.칼럼 수정
       socket.on('changeToServer', async (data: any) => {
-        console.log(data);
-        socket.emit('changeToClient', '본인이 순서 변경'); // 체크용
-        socket.to(boardId).emit('changeToClient', '타인이 순서 변경'); // 체크용
+        console.log('from서버:', data);
+        // socket.emit('changeToClient', '본인이 순서 변경');
+        // socket.to(boardId).emit('changeToClient', '타인이 순서 변경');
       });
 
       // 1-3.칼럼 삭제
       socket.on('deleteToServer', async (data: any) => {
-        console.log(data);
-        socket.emit('deleteToClient', '본인이 삭제'); // 체크용
-        socket.to(boardId).emit('deleteToClient', '타인이 삭제'); // 체크용
+        console.log('from서버:', data);
+        socket.emit('deleteToClient', '본인이 삭제');
+        socket.to(boardId).emit('deleteToClient', '타인이 삭제');
       });
     });
   });
 
+  // event에서 clients정보 관리할 객체 선언 (key: socket.id, value: userId)
+  const clients: any = {};
   /** 2. event - 초대 */
   event.on('connection', (socket: any) => {
     console.log('event접속:', socket.id);
-    // console.log('여기서:', socket.handshake.query.userId);
-    // const loginUser = socket.handshake.query.userId;
-    // console.log('로그인 유저', loginUser);
 
     socket.on('error', (error: any) => {
       console.error(error);
     });
 
-    // A. loginAndAlarm
-    // main접속 -> (1)가장 최근 로그인 기록이 나오고 & (2)접속끊은 이후에 온 초대 메세지 확인
-    socket.on('loginAndAlarm', async (data: any) => {
-      const user = await usersRepository.getUser(data);
-      socket.user = user; // lastLogin담을 용도
-      const loginLog = user?.lastLogin || null;
-      const userName = user?.name;
-      const invitations = await usersRepository.getInvitations(data, userName);
+    socket.on('join', (roomName: any) => {
+      socket.join(roomName);
 
-      let inviteResult: any = '';
-      // 1)초대목록이 없는 경우
-      if (!invitations.length) {
-        inviteResult = '초대받은 알람이 없습니다';
-        socket.emit('loginAndAlarm', { loginLog, inviteResult });
-      }
-      // 2)초대목록이 있다면
-      else {
-        // 2-1)접속한 적이 있으면
-        if (loginLog) {
-          inviteResult = invitations.filter(
-            (invitation: any) =>
-              new Date(invitation.createdAt) > new Date(loginLog),
-          );
-          // console.log('최종확인:', invitations);
-          // 2-2)최초 접속(회원가입만 하고, 접속x경우 -> loginLog가 없음)
-        } else {
-          inviteResult = invitations;
+      // A. loginAndAlarm
+      // main접속 -> (1)가장 최근 로그인 기록이 나오고 & (2)접속끊은 이후에 온 초대 메세지 확인
+      socket.on('loginAndAlarm', async (data: any) => {
+        const user = await usersRepository.getUser(data);
+        socket.user = user; // lastLogin담을 용도
+        clients[socket.user.userId] = socket.id;
+        console.log(clients);
+        console.log(clients[socket.user.userId]);
+
+        const loginLog = user?.lastLogin || null;
+        const userName = user?.name;
+        const invitations = await usersRepository.getInvitations(
+          data,
+          userName,
+        );
+
+        let inviteResult: any = '';
+        // 1)초대목록이 없는 경우
+        if (!invitations.length) {
+          inviteResult = '초대받은 알람이 없습니다';
+          socket.emit('loginAndAlarm', { loginLog, inviteResult });
         }
-        console.log(inviteResult);
-        socket.emit('loginAndAlarm', { loginLog, inviteResult });
-      }
-    });
-
-    // B. 초대 알람
-    socket.on('invite', async (inviteInfo: any) => {
-      const Invitation = await usersRepository.createInvitations(
-        inviteInfo.workspaceId,
-        inviteInfo.invitedUserId, // 초대한 사람
-        inviteInfo.invitedByUserId, // 초대 받은 사람
-      );
-
-      // *worksacpes.repositories만들어지면 DI로 리팩토링
-      const workspace = await prisma.workspaces.findUnique({
-        where: { workspaceId: inviteInfo.workspaceId },
+        // 2)초대목록이 있다면
+        else {
+          // 2-1)접속한 적이 있으면
+          if (loginLog) {
+            inviteResult = invitations.filter(
+              (invitation: any) =>
+                new Date(invitation.createdAt) > new Date(loginLog),
+            );
+            // 2-2)최초 접속(회원가입만 하고, 접속x경우 -> loginLog가 없음)
+          } else {
+            inviteResult = invitations;
+          }
+          socket.emit('loginAndAlarm', { loginLog, inviteResult });
+        }
       });
 
-      const workspaceName = workspace?.workspaceName;
-      inviteInfo['workspaceName'] = workspaceName;
-      inviteInfo['invitationId'] = Invitation.invitationId;
+      // B. 초대 알람
+      socket.on('invite', async (inviteInfo: any) => {
+        const Invitation = await usersRepository.createInvitations(
+          inviteInfo.workspaceId,
+          inviteInfo.invitedUserId, // 초대한 사람
+          inviteInfo.invitedByUserId, // 초대 받은 사람
+        );
 
-      socket.emit('invite', inviteInfo);
+        const workspace = await prisma.workspaces.findUnique({
+          where: { workspaceId: inviteInfo.workspaceId },
+        });
+
+        const workspaceName = workspace?.workspaceName;
+        const user = await usersRepository.getUser(inviteInfo.invitedUserId);
+        inviteInfo['workspaceName'] = workspaceName;
+        inviteInfo['invitationId'] = Invitation.invitationId;
+        inviteInfo['userName'] = user?.name;
+        console.log(inviteInfo);
+
+        const invitedByUserIdSocketId = clients[inviteInfo.invitedByUserId];
+        console.log('socket?:', invitedByUserIdSocketId);
+        socket.to(invitedByUserIdSocketId).emit('invite', inviteInfo);
+      });
+
+      // *C. Notification확인 = isRead:true
+      socket.on('notification', async (invitationIds: any) => {
+        // invitationIds: notification안에 들어있는 invitation의 ID들이 담긴 '배열'
+        const changedInvitations = await usersRepository.chekcNotification(
+          socket.user.userId,
+          invitationIds,
+        );
+        socket.emit('notification', changedInvitations);
+      });
+
+      // D. 초대 승낙/거절
+      socket.on('confirmInvitation', async (data: any) => {
+        if (data.accepted) {
+          await usersRepository.createWorkspaceMember(
+            data.WorkspaceId,
+            data.InvitedByUserId,
+          );
+          await usersRepository.acceptInvitations(
+            data.invitationId,
+            data.accepted,
+          );
+          socket.emit('confirmInvitation', '초대를 승낙하였습니다');
+        } else {
+          const deletedAt = new Date(); // Soft delete
+          await usersRepository.declineInvitations(
+            data.invitationId,
+            data.accepted,
+            deletedAt,
+          );
+          socket.emit('confirmInvitation', '초대를 거절하였습니다');
+        }
+      });
     });
 
-    // C. 초대 승낙/거절 - user Router에서 마무리
-    socket.on('confirmInvitation', async (data: any) => {
-      if (data.accepted) {
-        await usersRepository.createWorkspaceMember(
-          data.workspaceId,
-          data.InvitedByUserId, // userId를 위에서 만든 loginUser로 대체
-        );
-        await usersRepository.acceptInvitations(
-          data.invitationId,
-          data.accepted,
-        );
-        socket.emit('confirmInvitation', '초대를 승낙하였습니다');
-      } else {
-        const deletedAt = new Date(); // Soft delete
-        await usersRepository.declineInvitations(
-          data.invitationId,
-          data.accepted,
-          deletedAt,
-        );
-        socket.emit('confirmInvitation', '초대를 거절하였습니다');
-      }
+    // *E. 워크스페이스 이름, 이미지 변경
+    socket.on('updateWorkspace', async (data: any) => {
+      // data에는 workspaceId, workspaceName, workspaceImage가 있어야 함
+      const result = await usersRepository.updateWorkspace(
+        socket.user.userId,
+        data.workspaceId,
+        data.workspaceName,
+        data.workspaceImage,
+      );
+
+      io.emit('updateWorkspace', result); // 전체에게 가도록 emit
     });
 
     socket.on('disconnect', async () => {
       console.log('event접속해제: ', socket.id);
       console.log('접속해제시 유저', socket.user);
+
       if (!socket.user) {
         return console.log('유저가 없음');
       }
+
+      delete clients[socket.user.userId]; // 접속해제시, clients정보 지우기
+      console.log(clients);
+
       const now = new Date();
       await usersRepository.updateLastloginUser(socket.user.userId, now);
 
@@ -165,14 +204,3 @@ const WebSocket = (server: HttpServer, app: Application) => {
 };
 
 export default WebSocket;
-
-// [ Not yet ]
-// (2-2)카드 순서 변경 -> /controllers/cards.ts에 추가
-// socket.on('cardToServer', async (data: any) => {
-//   console.log(data);
-//   socket.emit('cardToClient', '본인이 순서 변경');
-//   socket.to(boardId).emit('cardToClient', '타인이 순서 변경');
-// });
-// (3)그냥 떠나는게 아니라, 다른 방 이동이면 leave -> if문으로 join or disconnect
-// (x)방 나가기
-// socket.leave(boardId);
