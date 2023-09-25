@@ -43,7 +43,7 @@ class UsersRepository {
     return true;
   };
 
-  searchUser = async (email: string, name: string) => {
+  searchUser = async (email: string, name: string, workspaceId: number) => {
     const filters = [];
 
     if (email) {
@@ -62,8 +62,24 @@ class UsersRepository {
       });
     }
 
+    // 이미 워크스페이스에 존재하는 사용자를 찾아낸다.
+    const existingMembers = await prisma.workspacesMembers.findMany({
+      where: {
+        WorkspaceId: workspaceId,
+      },
+    });
+
+    // 이미 존재하는 멤버의 ID들을 배열로 만든다.
+    const existingMemberIds = existingMembers.map((member) => member.UserId);
+
+    // 검색 조건에 이미 워크스페이스에 존재하는 사용자를 제외한다.
     const result = await prisma.users.findMany({
       where: {
+        NOT: {
+          userId: {
+            in: existingMemberIds,
+          },
+        },
         OR: filters,
       },
       select: {
