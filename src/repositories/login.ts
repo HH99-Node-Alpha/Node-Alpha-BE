@@ -21,6 +21,15 @@ class LoginRepository {
             select: { refreshToken: true },
         })
     }
+
+    deleteRefreshToken = async (userId: number) => {
+        return await prisma.users.update({
+            where: { userId },
+            data: {
+                refreshToken: null,
+            },
+        });
+    }
 }
 
 export default LoginRepository;
