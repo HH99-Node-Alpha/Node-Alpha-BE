@@ -43,6 +43,13 @@ class LoginController {
 
         res.status(200).json({ data: {userId: user.userId, username: user.name} });
     });
+
+    // authMiddleware에서 토큰 검증을 하고, 검증에 성공하면 req.user에 userId를 저장합니다.
+    // 미들웨어에서 이미 토큰을 검증했으므로 여기서 추가적인 검증은 필요하지 않습니다.
+    verifyToken = asyncHandler( async (req: Request, res: Response) => {
+        res.status(200).json({ message: '엑세스 토큰 인증에 성공하였습니다.' });
+    });
+
 }
 
 export default LoginController;

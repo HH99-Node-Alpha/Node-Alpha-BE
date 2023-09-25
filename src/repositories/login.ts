@@ -14,8 +14,6 @@ class LoginRepository {
             },
         });
     }
-
-
 }
 
 export default LoginRepository;
