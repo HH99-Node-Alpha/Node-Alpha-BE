@@ -94,11 +94,15 @@ class ColumnsRepository {
     );
 
     if (isMember) {
-      await prisma.columns.delete({
+      const deletedColumn = await prisma.columns.delete({
         where: { columnId },
       });
 
-      return { message: 'success' };
+      return {
+        columnId: String(deletedColumn.columnId),
+        columnName: deletedColumn.columnName,
+        columnOrder: deletedColumn.columnOrder,
+      };
     }
   };
 }

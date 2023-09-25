@@ -19,7 +19,8 @@ class ColumnsController {
 
     if (result) {
       const io = req.app.get('io');
-      io.of('/board').emit('addColumn', result);
+      io.of('/board').emit('addColumn', result.column); // .column추가
+      console.log('result:', result.column);
     }
 
     res.status(200).send(result);
@@ -43,6 +44,7 @@ class ColumnsController {
       if (result) {
         const io = req.app.get('io');
         io.of('/board').emit('updateColumn', result);
+        console.log('result:', result);
       }
 
       res.status(200).send(result);
@@ -64,6 +66,7 @@ class ColumnsController {
         const io = req.app.get('io');
         io.of('/board').emit('deleteColumn', result);
       }
+      console.log('result:', result);
 
       res.status(200).send(result);
     },
