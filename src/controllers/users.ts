@@ -15,12 +15,20 @@ class UsersController {
   );
 
   searchUser = asyncHandler(async (req: Request, res: Response) => {
-    const { email, name } = req.query;
-    if (typeof email !== 'string' || typeof name !== 'string') {
+    const { email, name, workspaceId } = req.query;
+    if (
+      typeof email !== 'string' ||
+      typeof name !== 'string' ||
+      typeof workspaceId !== 'string'
+    ) {
       res.status(400).json({ error: 'Invalid parameters' });
       return;
     }
-    const result = await this.usersService.searchUser(email, name);
+    const result = await this.usersService.searchUser(
+      email,
+      name,
+      +workspaceId,
+    );
 
     res.status(200).json(result);
   });

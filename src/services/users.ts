@@ -9,8 +9,12 @@ class UsersService {
     return result;
   };
 
-  searchUser = async (email: string, name: string) => {
-    const result = await this.usersRepository.searchUser(email, name);
+  searchUser = async (email: string, name: string, workspaceId: number) => {
+    const result = await this.usersRepository.searchUser(
+      email,
+      name,
+      workspaceId,
+    );
     return result;
   };
 }
