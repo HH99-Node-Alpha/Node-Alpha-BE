@@ -78,6 +78,10 @@ class LoginService {
 
         return newAccessToken;
     }
+
+    logout = async (userId: number) => {
+        await this.loginRepository.deleteRefreshToken(userId);
+    }
 }
 
 export default LoginService;

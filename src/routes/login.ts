@@ -14,7 +14,7 @@ const loginController = new LoginController(loginService);
 router.post('/login', loginController.login);
 router.post('/token', authMiddleware, loginController.verifyToken);
 router.post('/refresh', loginController.refreshToken);
-// router.post('/logout', authMiddleware, loginController.logout);
+router.post('/logout', authMiddleware, loginController.logout);
 
 export default router; 
 
