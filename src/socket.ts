@@ -41,21 +41,21 @@ const WebSocket = (server: HttpServer, app: Application) => {
 
       // 1-1.칼럼 추가
       socket.on('addToServer', async (data: any) => {
-        console.log(data);
+        console.log('from서버:', data);
         socket.emit('addToClient', '본인이 추가');
         socket.to(boardId).emit('addToClient', '타인이 추가');
       });
 
       // 1-2.칼럼 수정
       socket.on('changeToServer', async (data: any) => {
-        console.log(data);
-        socket.emit('changeToClient', '본인이 순서 변경');
-        socket.to(boardId).emit('changeToClient', '타인이 순서 변경');
+        console.log('from서버:', data);
+        // socket.emit('changeToClient', '본인이 순서 변경');
+        // socket.to(boardId).emit('changeToClient', '타인이 순서 변경');
       });
 
       // 1-3.칼럼 삭제
       socket.on('deleteToServer', async (data: any) => {
-        console.log(data);
+        console.log('from서버:', data);
         socket.emit('deleteToClient', '본인이 삭제');
         socket.to(boardId).emit('deleteToClient', '타인이 삭제');
       });
@@ -126,20 +126,33 @@ const WebSocket = (server: HttpServer, app: Application) => {
         });
 
         const workspaceName = workspace?.workspaceName;
+        const user = await usersRepository.getUser(inviteInfo.invitedUserId);
         inviteInfo['workspaceName'] = workspaceName;
         inviteInfo['invitationId'] = Invitation.invitationId;
+        inviteInfo['userName'] = user?.name;
+        console.log(inviteInfo);
 
         const invitedByUserIdSocketId = clients[inviteInfo.invitedByUserId];
-        console.log(invitedByUserIdSocketId);
+        console.log('socket?:', invitedByUserIdSocketId);
         socket.to(invitedByUserIdSocketId).emit('invite', inviteInfo);
       });
 
-      // C. 초대 승낙/거절
+      // *C. Notification확인 = isRead:true
+      socket.on('notification', async (invitationIds: any) => {
+        // invitationIds: notification안에 들어있는 invitation의 ID들이 담긴 '배열'
+        const changedInvitations = await usersRepository.chekcNotification(
+          socket.user.userId,
+          invitationIds,
+        );
+        socket.emit('notification', changedInvitations);
+      });
+
+      // D. 초대 승낙/거절
       socket.on('confirmInvitation', async (data: any) => {
         if (data.accepted) {
           await usersRepository.createWorkspaceMember(
-            data.workspaceId,
-            data.InvitedByUserId, // userId를 위에서 만든 loginUser로 대체
+            data.WorkspaceId,
+            data.InvitedByUserId,
           );
           await usersRepository.acceptInvitations(
             data.invitationId,
@@ -158,15 +171,30 @@ const WebSocket = (server: HttpServer, app: Application) => {
       });
     });
 
+    // *E. 워크스페이스 이름, 이미지 변경
+    socket.on('updateWorkspace', async (data: any) => {
+      // data에는 workspaceId, workspaceName, workspaceImage가 있어야 함
+      const result = await usersRepository.updateWorkspace(
+        socket.user.userId,
+        data.workspaceId,
+        data.workspaceName,
+        data.workspaceImage,
+      );
+
+      io.emit('updateWorkspace', result); // 전체에게 가도록 emit
+    });
+
     socket.on('disconnect', async () => {
       console.log('event접속해제: ', socket.id);
       console.log('접속해제시 유저', socket.user);
 
-      delete clients[socket.id]; // 접속해제시, clients정보 지우기
-
       if (!socket.user) {
         return console.log('유저가 없음');
       }
+
+      delete clients[socket.user.userId]; // 접속해제시, clients정보 지우기
+      console.log(clients);
+
       const now = new Date();
       await usersRepository.updateLastloginUser(socket.user.userId, now);
 
