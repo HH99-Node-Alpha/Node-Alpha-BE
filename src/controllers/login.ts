@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../lib/asyncHandler';
 import LoginService from '../services/login';
 import { CustomError } from '../errors/customError';
@@ -48,6 +48,23 @@ class LoginController {
     // 미들웨어에서 이미 토큰을 검증했으므로 여기서 추가적인 검증은 필요하지 않습니다.
     verifyToken = asyncHandler( async (req: Request, res: Response) => {
         res.status(200).json({ message: '엑세스 토큰 인증에 성공하였습니다.' });
+    });
+
+    // Access Token 재발급
+    // Refresh Token이 유효한지 확인하고 검증, 만료되었다면 에러를 발생시킵니다.
+    refreshToken = asyncHandler( async (req: Request, res: Response, next: NextFunction) => {
+        try{
+        const newAccessToken = await this.loginService.refreshToken(req);
+        res.cookie('Authorization', `Bearer ${newAccessToken}`, cookieOptions);
+        res.status(200).json({ newAccessToken });
+        } catch (error:any) {
+            if(error instanceof CustomError && error.status === 401) {
+                res.clearCookie('Authorization', cookieOptions);
+                res.clearCookie('refreshToken', cookieOptions);
+                res.status(401).json({ message: '리프레시 토큰이 만료되었습니다.' });
+            }
+        next(error);
+        }
     });
 
 }

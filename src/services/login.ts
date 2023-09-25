@@ -49,6 +49,35 @@ class LoginService {
             name: user.name,
         };
     }
+
+    refreshToken = async (req: Request) => {
+        const { refreshToken } = req.cookies;
+        
+        if (!refreshToken) {
+            throw new CustomError(401, '리프레시 토큰이 존재하지 않습니다.')
+        }
+
+        const decodedToken = jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY!);
+        if( typeof decodedToken !== 'object' || decodedToken === null) {
+            throw new CustomError(401, '리프레시 토큰 형식이 올바르지 않습니다.')
+        }
+
+        const userId = decodedToken.userId;
+        const user = await this.loginRepository.findUserByRefreshToken(+userId, refreshToken);
+
+        if (!user || refreshToken !== user.refreshToken) {
+
+            throw new CustomError(401, '리프레시 토큰 인증에 실패하였습니다.')
+        }
+
+        const newAccessToken = await jwt.sign(
+            { userId: userId },
+            process.env.ACCESS_SECRET_KEY!,
+            { expiresIn: '1h' }
+        );
+
+        return newAccessToken;
+    }
 }
 
 export default LoginService;

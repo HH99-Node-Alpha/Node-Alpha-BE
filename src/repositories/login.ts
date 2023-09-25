@@ -14,6 +14,13 @@ class LoginRepository {
             },
         });
     }
+
+    findUserByRefreshToken = async (userId: number, refreshToken: string) => {
+        return await prisma.users.findUnique({
+            where: { userId },
+            select: { refreshToken: true },
+        })
+    }
 }
 
 export default LoginRepository;
