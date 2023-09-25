@@ -127,6 +127,7 @@ model Invitations {
   InvitedUserId   Int
   InvitedByUserId Int
   accepted        Boolean?
+  isRead          Boolean?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   deletedAt       DateTime?

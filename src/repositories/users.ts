@@ -43,7 +43,7 @@ class UsersRepository {
     return true;
   };
 
-  searchUser = async (email: string, name: string) => {
+  searchUser = async (email: string, name: string, workspaceId: number) => {
     const filters = [];
 
     if (email) {
@@ -62,8 +62,24 @@ class UsersRepository {
       });
     }
 
+    // 이미 워크스페이스에 존재하는 사용자를 찾아낸다.
+    const existingMembers = await prisma.workspacesMembers.findMany({
+      where: {
+        WorkspaceId: workspaceId,
+      },
+    });
+
+    // 이미 존재하는 멤버의 ID들을 배열로 만든다.
+    const existingMemberIds = existingMembers.map((member) => member.UserId);
+
+    // 검색 조건에 이미 워크스페이스에 존재하는 사용자를 제외한다.
     const result = await prisma.users.findMany({
       where: {
+        NOT: {
+          userId: {
+            in: existingMemberIds,
+          },
+        },
         OR: filters,
       },
       select: {
@@ -137,6 +153,7 @@ class UsersRepository {
           WorkspaceId: workspaceId,
           InvitedUserId: invitedUserId, // 초대한 사람
           InvitedByUserId: invitedByUserId, // 초대 받은 사람
+          // isRead: False,
         },
       });
       return createdInvitations;
@@ -196,18 +213,61 @@ class UsersRepository {
     }
   };
 
-  // socket8(User에 tmpSocketId추가용) -> db조회 안하고, 관리하는 방법 해결(clients객체로)
-  // addSocketId = async (userId: number, socketId: string) => {
-  //   try {
-  //     const updatedUser = await prisma.users.update({
-  //       where: { userId },
-  //       data: { tmpSocket: socketId },
-  //     });
-  //     return updatedUser;
-  //   } catch (err) {
-  //     throw new CustomError(412, '입력값이 올바르지 않습니다');
-  //   }
-  // };
+  // socket8(workspace 이름, 이미지 변경)
+  updateWorkspace = async (
+    userId: number,
+    workspaceId: number,
+    workspaceName: string,
+    workspaceImage: string,
+  ) => {
+    const updatedWorkspace = await prisma.workspaces.update({
+      where: { ownerId: userId, workspaceId },
+      data: { workspaceName, workspaceImage },
+    });
+
+    const result = {
+      workspaceId: updatedWorkspace.workspaceId,
+      workspaceName: updatedWorkspace.workspaceName,
+      workspaceImage: updatedWorkspace.workspaceImage,
+    };
+
+    return result;
+  };
+
+  // socket9(invitations - isRead Ok)
+  chekcNotification = async (
+    invitedByUserId: number,
+    invitationIds: number[],
+  ) => {
+    const user = await prisma.users.findUnique({
+      where: { userId: invitedByUserId },
+    });
+
+    const result = [];
+    // 각 초대장에 필요한 정보들: invitationId, userId, userName, workspaceId, workspaceName, isRead
+    for (const invitationId of invitationIds) {
+      const updated = await prisma.invitations.update({
+        where: { invitationId },
+        data: { isRead: true },
+      });
+
+      const workspace = await prisma.workspaces.findUnique({
+        where: { workspaceId: updated.WorkspaceId },
+      });
+
+      const updated2 = {
+        invitationId: updated.invitationId,
+        userId: invitedByUserId,
+        userName: user?.name,
+        workspaceId: updated.WorkspaceId,
+        workspaceName: workspace?.workspaceName,
+        isRead: updated.isRead,
+      };
+      result.push(updated2);
+    }
+
+    return result; // 통째로 보내기
+  };
 }
 
 export default UsersRepository;
