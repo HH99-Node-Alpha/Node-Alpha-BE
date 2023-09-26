@@ -130,7 +130,7 @@ const WebSocket = (server: HttpServer, app: Application) => {
         inviteInfo['workspaceName'] = workspaceName;
         inviteInfo['invitationId'] = Invitation.invitationId;
         inviteInfo['userName'] = user?.name;
-        console.log(inviteInfo);
+        console.log('inviteInfo:', inviteInfo);
 
         const invitedByUserIdSocketId = clients[inviteInfo.invitedByUserId];
         console.log('socket?:', invitedByUserIdSocketId);
@@ -150,9 +150,10 @@ const WebSocket = (server: HttpServer, app: Application) => {
       // D. 초대 승낙/거절
       socket.on('confirmInvitation', async (data: any) => {
         if (data.accepted) {
+          console.log('data:', data);
           await usersRepository.createWorkspaceMember(
-            data.WorkspaceId,
-            data.InvitedByUserId,
+            data.workspaceId,
+            data.invitedByUserId,
           );
           await usersRepository.acceptInvitations(
             data.invitationId,
