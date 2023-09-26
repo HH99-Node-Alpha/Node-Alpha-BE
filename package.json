@@ -7,9 +7,7 @@
   "license": "MIT",
   "scripts": {
     "start:dev": "NODE_ENV=development nodemon app",
-    "start:prod": "NODE_ENV=production pm2 start --name app-name --interpreter /home/ubuntu/alpha/node_modules/.bin/ts-node -- src/app.ts",
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "start:prod": "NODE_ENV=production pm2 start --name app-name --interpreter /home/ubuntu/alpha/node_modules/.bin/ts-node -- src/app.ts"
   },
   "dependencies": {
     "@prisma/client": "5.3.0",
@@ -20,6 +18,7 @@
     "@types/express-session": "^1.17.7",
     "@types/morgan": "^1.9.5",
     "@types/passport": "^1.0.12",
+    "@types/socket.io-client": "^3.0.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -31,6 +30,7 @@
     "nodemon": "^3.0.1",
     "passport": "^0.6.0",
     "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "ts-node": "^10.9.1",
     "winston": "^3.10.0"
   },
