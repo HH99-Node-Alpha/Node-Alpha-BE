@@ -9,10 +9,10 @@ class LoginService {
         private readonly loginRepository: LoginRepository) {}
 
     login = async (email: string, password: string, req: Request) => {
-        //이메일 존재여부 확인
+        //이메일, 비밀번호 존재여부 확인
         const user = await this.loginRepository.findUserByEmail(email);
-        if (!user) {
-            throw new CustomError(409, '존재하지 않는 이메일입니다.') 
+        if (!user || !user.password) {
+            throw new CustomError(409, '사용자 정보가 잘못되었습니다.') 
         }
 
         //비밀번호 일치여부 확인

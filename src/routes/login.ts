@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 import authMiddleware from '../middlewares/auth';
 import LoginController from '../controllers/login';
 import LoginRepository from '../repositories/login';
@@ -15,6 +16,13 @@ router.post('/login', loginController.login);
 router.post('/token', authMiddleware, loginController.verifyToken);
 router.post('/refresh', loginController.refreshToken);
 router.post('/logout', authMiddleware, loginController.logout);
+router.get('/kakao', passport.authenticate('kakao')); // 카카오톡 로그인 화면으로 redirect
+router.get('/kakao/callback', passport.authenticate('kakao', { 
+    failureRedirect: '/login' 
+}), (req, res) => {
+    console.log(1)
+    res.redirect('http://localhost:3000');
+});
 
 export default router; 
 
