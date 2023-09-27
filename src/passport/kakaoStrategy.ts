@@ -12,7 +12,7 @@ export default () => {
     new KaKaoStrategy(
       {
         clientID: process.env.KAKAO_ID!,
-        callbackURL: `http://localhost:8000/api/kakao/callback`,
+        callbackURL: `${process.env.SERVER_URL}/api/kakao/callback`,
       },
       async (accessToken, refreshToken, profile, done) => {
         console.log('profile', profile);

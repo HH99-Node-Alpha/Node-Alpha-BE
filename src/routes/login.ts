@@ -70,7 +70,7 @@ router.get('/kakao/callback', passport.authenticate('kakao', {
     res.cookie('Authorization', `Bearer ${accessToken}`, cookieOptions);
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
-    res.redirect('http://localhost:3000/main');
+    res.redirect(`${process.env.CLIENT_URL}`);
 });
 
 
