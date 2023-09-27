@@ -170,10 +170,10 @@ router.get('/', authMiddleware, async (req, res) => {
 //   }
 // });
 
-router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
+router.put('/:workspaceId', authMiddleware, async (req, res) => {
   try {
     const { workspaceId } = req.params;
-    const { workspaceName } = req.body;
+    const { workspaceName, workspaceImage } = req.body;
 
     const user: any = req.user!;
     const ownerId = user.userId;
@@ -202,6 +202,7 @@ router.put('/workspaces/:workspaceId', authMiddleware, async (req, res) => {
       },
       data: {
         workspaceName,
+        workspaceImage,
       },
     });
 
