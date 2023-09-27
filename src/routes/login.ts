@@ -4,6 +4,7 @@ import authMiddleware from '../middlewares/auth';
 import LoginController from '../controllers/login';
 import LoginRepository from '../repositories/login';
 import LoginService from '../services/login';
+import jwt from 'jsonwebtoken';
 
 
 const router = express.Router();
@@ -21,7 +22,7 @@ router.get('/kakao/callback', passport.authenticate('kakao', {
     failureRedirect: '/login' 
 }), (req, res) => {
     console.log(1)
-    res.redirect('http://localhost:3000');
+    res.redirect('http://localhost:3000/main');
 });
 
 export default router; 
