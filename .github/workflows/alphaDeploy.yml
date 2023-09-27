@@ -27,6 +27,7 @@ jobs:
           echo 'CLIENT_PROD_URL=${{ secrets.CLIENT_PROD_URL }}' >> .env.production
           echo 'ACCESS_SECRET_KEY=${{ secrets.ACCESS_SECRET_KEY }}' >> .env.production
           echo 'REFRESH_SECRET_KEY=${{ secrets.REFRESH_SECRET_KEY }}' >> .env.production
+          echo 'KAKAO_ID=${{ secrets.KAKAO_ID }}' >> .env.production
 
       - name: Make Zip File
         run: |
