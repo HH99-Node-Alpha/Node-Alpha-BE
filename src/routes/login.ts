@@ -5,6 +5,8 @@ import LoginController from '../controllers/login';
 import LoginRepository from '../repositories/login';
 import LoginService from '../services/login';
 import jwt from 'jsonwebtoken';
+import { CustomExpressRequest } from '../../types/login';
+import { CustomError } from '../errors/customError';
 
 
 const router = express.Router();
@@ -17,13 +19,60 @@ router.post('/login', loginController.login);
 router.post('/token', authMiddleware, loginController.verifyToken);
 router.post('/refresh', loginController.refreshToken);
 router.post('/logout', authMiddleware, loginController.logout);
+
+type CookieOptions = {
+    httpOnly: boolean;
+    sameSite: 'none' | 'lax' | 'strict' | undefined;
+    secure: boolean;
+  }
+  
+  const cookieOptions: CookieOptions = {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  }
+
+
+
+
+// 카카오 로그인
 router.get('/kakao', passport.authenticate('kakao')); // 카카오톡 로그인 화면으로 redirect
+// 카카오 로그인 콜백
+// router.get('/kakao/callback', passport.authenticate('kakao', { 
+//     failureRedirect: '/login' 
+// }), (req, res) => {
+//     console.log(1)
+//     res.redirect('http://localhost:3000/main');
+// });
+
+
 router.get('/kakao/callback', passport.authenticate('kakao', { 
     failureRedirect: '/login' 
-}), (req, res) => {
-    console.log(1)
+}), (req: CustomExpressRequest, res) => {
+    // console.log(1)
+    const user = req.user;
+    if (!req.user) {
+        throw new CustomError (400, '사용자 정보가 잘못되었습니다.');
+    }
+
+    const accessToken = jwt.sign(
+        { userId: user.userId },
+        process.env.ACCESS_SECRET_KEY!,
+        { expiresIn: '1h' },
+    );
+
+    const refreshToken = jwt.sign(
+        { userId: user.userId, ip: req.ip, userAgent: req.headers['user-agent'] },
+        process.env.REFRESH_SECRET_KEY!,
+        { expiresIn: '1d' },
+    );
+
+    res.cookie('Authorization', `Bearer ${accessToken}`, cookieOptions);
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+
     res.redirect('http://localhost:3000/main');
 });
+
 
 export default router; 
 
