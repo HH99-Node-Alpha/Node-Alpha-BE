@@ -12,6 +12,7 @@ class UsersRepository {
               select: {
                 workspaceId: true,
                 workspaceName: true,
+                workspaceImage: true,
                 ownerId: true,
                 Boards: {
                   select: {

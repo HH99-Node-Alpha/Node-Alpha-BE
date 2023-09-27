@@ -15,11 +15,14 @@ import mainRouter from './routes/index';
 
 import notFound from './middlewares/notFound';
 import errorHandler from './middlewares/errorHandler';
+import passportConfig from './passport';
 
 config({ path: `.env.${process.env.NODE_ENV}` });
 
 const app = express();
 const server = http.createServer(app);
+
+passportConfig();
 
 app.set('port', process.env.PORT || 8000);
 app.use(LogMiddleware);

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { CustomExpressRequest } from '../../types/login';
 import asyncHandler from '../lib/asyncHandler';
 import LoginService from '../services/login';
 import { CustomError } from '../errors/customError';
@@ -69,9 +70,9 @@ class LoginController {
 
     // 로그아웃
     // Refresh Token을 데이터베이스에서 삭제하고, 쿠키에서도 삭제합니다.
-    logout = asyncHandler( async (req: Request, res: Response) => {
-        const user: any = req.user!; // !연산자는 null 또는 undefined가 아니라는 걸 확신할 때 사용합니다.
-        const userId = user.userId;
+    logout = asyncHandler( async (req: CustomExpressRequest, res: Response) => {
+        const userId = req.user.userId;
+        
 
         // Refresh Token을 데이터베이스에서 삭제합니다.
         await this.loginService.logout(userId);

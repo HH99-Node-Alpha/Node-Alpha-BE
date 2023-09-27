@@ -9,9 +9,11 @@ datasource db {
 
 model Users {
   userId       Int       @id @default(autoincrement()) @map("id")
-  email        String    @unique
+  email        String?   @unique
   name         String
-  password     String
+  password     String?
+  snsId        String?
+  provider     String    @default("local")
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
@@ -22,6 +24,7 @@ model Users {
   invitedByUserInvitations Invitations[] @relation("InvitedByUserRelation")
   invitedUserInvitations   Invitations[] @relation("InvitedUserRelation")
   
+  @@unique([snsId, provider])
   @@map("Users")
 }
 

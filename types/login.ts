@@ -8,3 +8,22 @@ export interface LoginRequest {
 export interface CustomExpressRequest extends Request {
   user?: any;
 }
+
+declare global {
+  namespace Express {
+    interface User {
+      userId: number;
+      name?: string;
+      password?: string | null;
+      profileUrl?: string | null;
+      kakaoLoggedInToken?: string | null;
+      googleLoggedInToken?: string | null;
+    }
+  }
+}
+
+declare module 'express-serve-static-core' {
+  interface Request {
+    file: Express.MulterS3.File;
+  }
+}
